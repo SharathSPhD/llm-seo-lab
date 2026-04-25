@@ -1,0 +1,10 @@
+node_modules
+dist
+build
+.next
+.turbo
+docs
+tools
+*.lock
+*.log
+*.json

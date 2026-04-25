@@ -2,22 +2,40 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "feature/**"]
   pull_request:
     branches: [main]
 
 jobs:
-  docs-lint:
-    name: Docs link & markdown sanity
+  ts-typecheck-test:
+    name: TypeScript typecheck + tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Verify docs/ structure exists
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run lint --silent
+      - run: npm run typecheck --silent
+      - run: npm run test --silent
+
+  python-lint:
+    name: Python ruff lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Ruff lint
         run: |
-          for d in research triz spec prd plans benchmarks use-cases whitepaper; do
-            test -d "docs/$d" || (echo "Missing docs/$d" && exit 1)
-          done
-      - name: Verify foundational research is present
-        run: test -f docs/research/seo_research_1.md
+          export PATH="$HOME/.cargo/bin:$PATH"
+          uvx ruff check .

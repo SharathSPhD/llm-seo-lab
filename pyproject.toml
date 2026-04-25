@@ -1,0 +1,22 @@
+[project]
+name = "llm-seo-lab"
+version = "0.1.0a1"
+description = "Path-breaking AEO/LLM-SEO platform — Python harnesses, statistical analysis, and skill harness scripts."
+requires-python = ">=3.10"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = [
+  "tools",
+  "node_modules",
+  ".git",
+  "docs/triz/attractor-trajectory.json",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "PL"]
+ignore = ["E501", "PLR0913", "PLR2004"]
+
+[tool.ruff.format]
+quote-style = "double"
