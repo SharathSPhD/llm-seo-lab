@@ -17,6 +17,8 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mjs,cjs,md,yml,yaml}\"",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
+    "test:benchmarks": "python3 -m unittest discover -s benchmarks -p '*_test.py'",
+    "test:benchmarks:run": "python3 -m benchmarks.runner.cli --output-dir benchmarks/runs/local",
     "build": "npm run build --workspaces --if-present",
     "smoke": "node scripts/smoke.mjs"
   },

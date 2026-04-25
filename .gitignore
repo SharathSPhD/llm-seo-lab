@@ -67,6 +67,9 @@ lerna-debug.log*
 # Benchmark raw data (large)
 benchmarks/raw/
 benchmarks/output/
+benchmarks/runs/*/events.jsonl
+benchmarks/runs/ci/
+benchmarks/runs/local/
 docs/benchmarks/raw/
 
 # Temporary

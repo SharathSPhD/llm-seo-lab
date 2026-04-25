@@ -109,13 +109,53 @@ npm run smoke
 ### Useful scripts
 
 ```bash
-npm run typecheck   # tsc --noEmit across all workspaces
-npm run test        # node --test in every workspace; pytest in mcp/
-npm run lint        # eslint
-npm run format      # prettier --write
-npm run build       # next build for apps/web; tsc for packages
-npm run smoke       # daemon e2e smoke test
+npm run typecheck            # tsc --noEmit across all workspaces
+npm run test                 # node --test in every workspace; pytest in mcp/
+npm run lint                 # eslint
+npm run format               # prettier --write
+npm run build                # next build for apps/web; tsc for packages
+npm run smoke                # daemon e2e smoke test
+npm run test:benchmarks      # Phase 6 statistics + question-bank + runner unit tests
+npm run test:benchmarks:run  # full Phase 6 simulation -> benchmarks/runs/local/results.md
 ```
+
+## Phase 6 — statistical benchmarking
+
+The benchmarking harness is fully described in
+[`docs/benchmarks/methodology.md`](docs/benchmarks/methodology.md), which is the
+**pre-registration** of the experiment (frozen before any results were
+collected). The pre-reg covers the hypothesis statements, the deterministic
+1500-question bank, the five-engine cohort, the four treatments, the power
+calculation that fixed N=1500, and the Bonferroni-corrected analysis plan.
+
+`benchmarks/` ships:
+
+- `analysis/power.py` — pure-Python sample-size calculator (no SciPy dependency)
+- `analysis/stats.py` — pooled two-proportion z-test, Bonferroni, Cohen's h,
+  bootstrap CIs, McNemar's test
+- `questions/bank.py` — deterministic 1500-question bank (50 topics × 10
+  templates × 4 categories) seeded from `questions/seeds.json`
+- `engines/simulation.py` — Bernoulli-draw simulators for Perplexity, ChatGPT,
+  Google AIO, Gemini, Claude.ai with calibration documented in source
+- `treatments/registry.py` — the four treatment labels declared in §5
+- `runner/orchestrator.py` — walks the (engine × treatment × site × question)
+  grid in canonical order and writes byte-stable JSONL events
+- `analysis/renderer.py` — turns the JSONL into a `results.md` with the
+  full pre-registered analysis (headline contrast + Bonferroni + bootstrap CI
+  + Cohen's h + McNemar paired-test robustness check + secondary contrasts)
+
+Run the simulation harness end-to-end (≈3 s, 180 000 Bernoulli draws):
+
+```bash
+npm run test:benchmarks:run
+open benchmarks/runs/local/results.md
+```
+
+The simulation calibrates `llm_seo_lab` to a +5–7pp uplift per engine vs
+`baseline` (the [seo_research_2.md](docs/research/seo_research_2.md) survey
+midpoint) so the harness can validate the entire pipeline — including the
+statistical rejection logic — without touching real engines. Phase 7 swaps in
+real Playwright + Claude CLI adapters behind the same `Engine` protocol.
 
 ## Development workflow
 

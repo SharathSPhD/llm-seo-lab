@@ -56,3 +56,23 @@ jobs:
         run: |
           export PATH="$HOME/.cargo/bin:$PATH"
           bash skills/run-all-tests.sh
+
+  benchmarks:
+    name: Phase 6 benchmark suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run statistical analysis + question-bank + runner tests
+        run: python -m unittest discover -s benchmarks -p '*_test.py' -v
+      - name: Smoke-run the harness end-to-end (renders results.md)
+        run: python -m benchmarks.runner.cli --output-dir benchmarks/runs/ci
+      - name: Verify results.md is non-empty and headline-significant
+        run: |
+          test -s benchmarks/runs/ci/results.md
+          grep -q "Per-engine headline contrast" benchmarks/runs/ci/results.md
+          grep -q "Bonferroni-corrected significance" benchmarks/runs/ci/results.md

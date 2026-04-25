@@ -1,0 +1,965 @@
+{
+  "by_engine_site_treatment": [
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.17933333333333334,
+      "site_id": "S1",
+      "successes": 269,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.17266666666666666,
+      "site_id": "S1",
+      "successes": 259,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.248,
+      "site_id": "S1",
+      "successes": 372,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.20733333333333334,
+      "site_id": "S1",
+      "successes": 311,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.172,
+      "site_id": "S2",
+      "successes": 258,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.17066666666666666,
+      "site_id": "S2",
+      "successes": 256,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.224,
+      "site_id": "S2",
+      "successes": 336,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.21066666666666667,
+      "site_id": "S2",
+      "successes": 316,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.18066666666666667,
+      "site_id": "S3",
+      "successes": 271,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.18466666666666667,
+      "site_id": "S3",
+      "successes": 277,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.23733333333333334,
+      "site_id": "S3",
+      "successes": 356,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.19066666666666668,
+      "site_id": "S3",
+      "successes": 286,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.17933333333333334,
+      "site_id": "S4",
+      "successes": 269,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.192,
+      "site_id": "S4",
+      "successes": 288,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.24,
+      "site_id": "S4",
+      "successes": 360,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.206,
+      "site_id": "S4",
+      "successes": 309,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.18666666666666668,
+      "site_id": "S5",
+      "successes": 280,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.17066666666666666,
+      "site_id": "S5",
+      "successes": 256,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.236,
+      "site_id": "S5",
+      "successes": 354,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.20266666666666666,
+      "site_id": "S5",
+      "successes": 304,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.18533333333333332,
+      "site_id": "S6",
+      "successes": 278,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.182,
+      "site_id": "S6",
+      "successes": 273,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.25133333333333335,
+      "site_id": "S6",
+      "successes": 377,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "chatgpt",
+      "n": 1500,
+      "rate": 0.21133333333333335,
+      "site_id": "S6",
+      "successes": 317,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.19333333333333333,
+      "site_id": "S1",
+      "successes": 290,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.20933333333333334,
+      "site_id": "S1",
+      "successes": 314,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.25133333333333335,
+      "site_id": "S1",
+      "successes": 377,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.20333333333333334,
+      "site_id": "S1",
+      "successes": 305,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.19466666666666665,
+      "site_id": "S2",
+      "successes": 292,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.19466666666666665,
+      "site_id": "S2",
+      "successes": 292,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.2813333333333333,
+      "site_id": "S2",
+      "successes": 422,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.19266666666666668,
+      "site_id": "S2",
+      "successes": 289,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.206,
+      "site_id": "S3",
+      "successes": 309,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.19866666666666666,
+      "site_id": "S3",
+      "successes": 298,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.256,
+      "site_id": "S3",
+      "successes": 384,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.212,
+      "site_id": "S3",
+      "successes": 318,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.206,
+      "site_id": "S4",
+      "successes": 309,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.19,
+      "site_id": "S4",
+      "successes": 285,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.25866666666666666,
+      "site_id": "S4",
+      "successes": 388,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.20866666666666667,
+      "site_id": "S4",
+      "successes": 313,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.19866666666666666,
+      "site_id": "S5",
+      "successes": 298,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.20266666666666666,
+      "site_id": "S5",
+      "successes": 304,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.26066666666666666,
+      "site_id": "S5",
+      "successes": 391,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.21,
+      "site_id": "S5",
+      "successes": 315,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.18866666666666668,
+      "site_id": "S6",
+      "successes": 283,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.18133333333333335,
+      "site_id": "S6",
+      "successes": 272,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.24666666666666667,
+      "site_id": "S6",
+      "successes": 370,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "claude_ai",
+      "n": 1500,
+      "rate": 0.20066666666666666,
+      "site_id": "S6",
+      "successes": 301,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.16933333333333334,
+      "site_id": "S1",
+      "successes": 254,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.162,
+      "site_id": "S1",
+      "successes": 243,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.21133333333333335,
+      "site_id": "S1",
+      "successes": 317,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.178,
+      "site_id": "S1",
+      "successes": 267,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.158,
+      "site_id": "S2",
+      "successes": 237,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.17,
+      "site_id": "S2",
+      "successes": 255,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.21466666666666667,
+      "site_id": "S2",
+      "successes": 322,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.18133333333333335,
+      "site_id": "S2",
+      "successes": 272,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.16066666666666668,
+      "site_id": "S3",
+      "successes": 241,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.158,
+      "site_id": "S3",
+      "successes": 237,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.20733333333333334,
+      "site_id": "S3",
+      "successes": 311,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.18533333333333332,
+      "site_id": "S3",
+      "successes": 278,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.172,
+      "site_id": "S4",
+      "successes": 258,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.14933333333333335,
+      "site_id": "S4",
+      "successes": 224,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.212,
+      "site_id": "S4",
+      "successes": 318,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.18066666666666667,
+      "site_id": "S4",
+      "successes": 271,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.16133333333333333,
+      "site_id": "S5",
+      "successes": 242,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.168,
+      "site_id": "S5",
+      "successes": 252,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.22133333333333333,
+      "site_id": "S5",
+      "successes": 332,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.178,
+      "site_id": "S5",
+      "successes": 267,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.17333333333333334,
+      "site_id": "S6",
+      "successes": 260,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.15466666666666667,
+      "site_id": "S6",
+      "successes": 232,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.20866666666666667,
+      "site_id": "S6",
+      "successes": 313,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "gemini",
+      "n": 1500,
+      "rate": 0.172,
+      "site_id": "S6",
+      "successes": 258,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.21133333333333335,
+      "site_id": "S1",
+      "successes": 317,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.21666666666666667,
+      "site_id": "S1",
+      "successes": 325,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.278,
+      "site_id": "S1",
+      "successes": 417,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.23466666666666666,
+      "site_id": "S1",
+      "successes": 352,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.234,
+      "site_id": "S2",
+      "successes": 351,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.204,
+      "site_id": "S2",
+      "successes": 306,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.268,
+      "site_id": "S2",
+      "successes": 402,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.242,
+      "site_id": "S2",
+      "successes": 363,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.22133333333333333,
+      "site_id": "S3",
+      "successes": 332,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.21,
+      "site_id": "S3",
+      "successes": 315,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.2806666666666667,
+      "site_id": "S3",
+      "successes": 421,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.25066666666666665,
+      "site_id": "S3",
+      "successes": 376,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.23533333333333334,
+      "site_id": "S4",
+      "successes": 353,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.226,
+      "site_id": "S4",
+      "successes": 339,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.2753333333333333,
+      "site_id": "S4",
+      "successes": 413,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.22866666666666666,
+      "site_id": "S4",
+      "successes": 343,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.24133333333333334,
+      "site_id": "S5",
+      "successes": 362,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.22133333333333333,
+      "site_id": "S5",
+      "successes": 332,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.27266666666666667,
+      "site_id": "S5",
+      "successes": 409,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.24333333333333335,
+      "site_id": "S5",
+      "successes": 365,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.23333333333333334,
+      "site_id": "S6",
+      "successes": 350,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.22933333333333333,
+      "site_id": "S6",
+      "successes": 344,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.286,
+      "site_id": "S6",
+      "successes": 429,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "google_aio",
+      "n": 1500,
+      "rate": 0.228,
+      "site_id": "S6",
+      "successes": 342,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.21466666666666667,
+      "site_id": "S1",
+      "successes": 322,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.18666666666666668,
+      "site_id": "S1",
+      "successes": 280,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.252,
+      "site_id": "S1",
+      "successes": 378,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.21,
+      "site_id": "S1",
+      "successes": 315,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.2,
+      "site_id": "S2",
+      "successes": 300,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.19866666666666666,
+      "site_id": "S2",
+      "successes": 298,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.2886666666666667,
+      "site_id": "S2",
+      "successes": 433,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.22333333333333333,
+      "site_id": "S2",
+      "successes": 335,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.23133333333333334,
+      "site_id": "S3",
+      "successes": 347,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.194,
+      "site_id": "S3",
+      "successes": 291,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.26866666666666666,
+      "site_id": "S3",
+      "successes": 403,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.21533333333333332,
+      "site_id": "S3",
+      "successes": 323,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.22733333333333333,
+      "site_id": "S4",
+      "successes": 341,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.20733333333333334,
+      "site_id": "S4",
+      "successes": 311,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.268,
+      "site_id": "S4",
+      "successes": 402,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.21533333333333332,
+      "site_id": "S4",
+      "successes": 323,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.218,
+      "site_id": "S5",
+      "successes": 327,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.19266666666666668,
+      "site_id": "S5",
+      "successes": 289,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.24333333333333335,
+      "site_id": "S5",
+      "successes": 365,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.21533333333333332,
+      "site_id": "S5",
+      "successes": 323,
+      "treatment": "profound_style"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.208,
+      "site_id": "S6",
+      "successes": 312,
+      "treatment": "athenahq_style"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.21133333333333335,
+      "site_id": "S6",
+      "successes": 317,
+      "treatment": "baseline"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.25666666666666665,
+      "site_id": "S6",
+      "successes": 385,
+      "treatment": "llm_seo_lab"
+    },
+    {
+      "engine": "perplexity",
+      "n": 1500,
+      "rate": 0.22333333333333333,
+      "site_id": "S6",
+      "successes": 335,
+      "treatment": "profound_style"
+    }
+  ],
+  "schema_version": 1
+}
