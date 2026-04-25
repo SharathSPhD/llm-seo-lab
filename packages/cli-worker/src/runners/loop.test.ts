@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { runLoopOnce } from "./loop.ts";
+import { NoopPratyakshaClient, type PratyakshaClient, type ContextElement } from "../pratyaksha_client.ts";
 import type { JobRecord } from "../types.ts";
 import type { SiteConfig, PageAuditResult, ContentBrief, PrSummary } from "@llm-seo-lab/shared";
 
@@ -98,6 +99,66 @@ function makePr(pr_number: number, brief_id: string): PrSummary {
   };
 }
 
+interface FakePratyakshaState {
+  store: Map<string, ContextElement>;
+  setSakshiCalls: { content: string }[];
+  contextInsertCalls: unknown[];
+  contextRetrieveCalls: unknown[];
+  detectConflictCalls: unknown[];
+  sublateCalls: unknown[];
+}
+
+function fakePratyaksha(opts: { available?: boolean; seed?: ContextElement[] } = {}): {
+  client: PratyakshaClient;
+  state: FakePratyakshaState;
+} {
+  const state: FakePratyakshaState = {
+    store: new Map(),
+    setSakshiCalls: [],
+    contextInsertCalls: [],
+    contextRetrieveCalls: [],
+    detectConflictCalls: [],
+    sublateCalls: [],
+  };
+  for (const e of opts.seed ?? []) state.store.set(e.id, e);
+  const client: PratyakshaClient = {
+    available: opts.available ?? true,
+    async setSakshi(input) { state.setSakshiCalls.push(input); return { ok: true, tokens: 0 }; },
+    async contextInsert(input) {
+      state.contextInsertCalls.push(input);
+      state.store.set(input.id, {
+        id: input.id, content: input.content, precision: input.precision,
+        avacchedaka: { qualificand: input.qualificand, qualifier: input.qualifier, condition: input.condition, relation: input.relation ?? "inherence" },
+        sublated_by: null,
+      });
+      return { ok: true, element_id: input.id };
+    },
+    async contextRetrieve(input) {
+      state.contextRetrieveCalls.push(input);
+      const elements: ContextElement[] = [];
+      for (const e of state.store.values()) {
+        if (e.avacchedaka.qualificand !== input.qualificand) continue;
+        if (input.qualifier && e.avacchedaka.qualifier !== input.qualifier) continue;
+        if ((input.precision_threshold ?? 0) > e.precision) continue;
+        if (e.sublated_by) continue;
+        elements.push(e);
+      }
+      return { ok: true, elements };
+    },
+    async detectConflict(input) {
+      state.detectConflictCalls.push(input);
+      return { ok: true, conflict_pairs: [] };
+    },
+    async sublateWithEvidence(input) {
+      state.sublateCalls.push(input);
+      const older = state.store.get(input.older_id);
+      if (older) older.sublated_by = `pending-${Date.now()}`;
+      return { ok: true };
+    },
+  };
+  return { client, state };
+}
+
 describe("runLoopOnce", () => {
   it("happy path: filters Tier-1 gaps above threshold, drafts briefs, opens PR", async () => {
     const f = fakeMcp({
@@ -145,7 +206,8 @@ describe("runLoopOnce", () => {
     assert.equal(prInput["brief_id"], "brief_g1");
     assert.match(prInput["branch"] as string, /^aeo-fix\/a_001$/);
 
-    assert.deepEqual(events, ["read_config", "audit_page", "generate_brief", "open_pr", "done"]);
+    assert.deepEqual(events, ["read_config", "audit_page", "manas", "buddhi", "open_pr", "done"]);
+    assert.equal(r.buddhi?.pratyaksha_available, false, "default deps use NoopPratyakshaClient");
   });
 
   it("returns no_qualifying_gaps when nothing passes the filter", async () => {
@@ -188,6 +250,100 @@ describe("runLoopOnce", () => {
     });
     const r = await runLoopOnce(makeJob(), { mcp: f.client });
     assert.equal(r.next_step, "no_qualifying_gaps");
+  });
+
+  it("pratyaksha first-run: inserts every brief into the Avacchedaka store", async () => {
+    const { client, state } = fakePratyaksha({ available: true });
+    const f = fakeMcp({
+      read_config: makeCfg({ max_gaps_per_pr: 2 }),
+      audit_page: makeAudit("a_p1", [
+        { gap_id: "g1", tactic: "cite_sources", evidence_tier: "tier1", predicted_lift_pp: 12, geo_paper_reference: "GEO §3.1", page_locator: "main", rationale: "x" },
+        { gap_id: "g2", tactic: "statistics_addition", evidence_tier: "tier1", predicted_lift_pp: 8, geo_paper_reference: "GEO §3.3", page_locator: "main", rationale: "x" },
+      ]),
+      generate_brief: (input: unknown) => makeBrief(`brief_${(input as { gap: { gap_id: string } }).gap.gap_id}`),
+      open_pr: makePr(50, "brief_g1"),
+    });
+    const r = await runLoopOnce(makeJob(), { mcp: f.client, pratyaksha: client });
+    assert.equal(r.next_step, "human_review");
+    assert.equal(r.gaps_filed, 2);
+    assert.equal(r.buddhi?.pratyaksha_available, true);
+    assert.equal(r.buddhi?.conflicts_detected, 0);
+    assert.equal(r.buddhi?.sublations_recorded, 0);
+    assert.equal(r.buddhi?.blocked_briefs, 0);
+    assert.equal(state.contextInsertCalls.length, 2, "both briefs go into the store");
+    assert.equal(state.contextRetrieveCalls.length, 2, "Buddhi consults the store before each PR");
+  });
+
+  it("pratyaksha sublation: lower-precision prior recommendation is superseded", async () => {
+    const { client, state } = fakePratyaksha({
+      available: true,
+      seed: [
+        {
+          id: "old_brief_001",
+          content: "freshness | tier=tier2 | lift=2pp | stale advice from a prior run",
+          precision: 0.1,
+          avacchedaka: { qualificand: "s1::https://s1.example/p1", qualifier: "cite_sources", condition: "tier=tier1", relation: "inherence" },
+          sublated_by: null,
+        },
+      ],
+    });
+    const f = fakeMcp({
+      read_config: makeCfg(),
+      audit_page: makeAudit("a_p2", [
+        { gap_id: "g1", tactic: "cite_sources", evidence_tier: "tier1", predicted_lift_pp: 14, geo_paper_reference: "GEO §3.1", page_locator: "main", rationale: "totally different rationale: cite primary GEO sources for the headline claim" },
+      ]),
+      generate_brief: makeBrief("brief_g1"),
+      open_pr: makePr(51, "brief_g1"),
+    });
+    const r = await runLoopOnce(makeJob(), { mcp: f.client, pratyaksha: client });
+    assert.equal(r.next_step, "human_review");
+    assert.equal(r.gaps_filed, 1);
+    assert.equal(r.buddhi?.conflicts_detected, 1, "one conflict found");
+    assert.equal(r.buddhi?.sublations_recorded, 1, "and resolved by sublation");
+    assert.equal(r.buddhi?.blocked_briefs, 0, "PR is not blocked since new brief has higher precision");
+    assert.equal(state.sublateCalls.length, 1);
+    assert.equal((state.sublateCalls[0] as { older_id: string }).older_id, "old_brief_001");
+  });
+
+  it("pratyaksha buddhi block: higher-precision prior keeps PR closed", async () => {
+    const { client } = fakePratyaksha({
+      available: true,
+      seed: [
+        {
+          id: "old_brief_002",
+          content: "cite_sources | tier=tier1 | lift=18pp | a much higher-precision prior recommendation already filed",
+          precision: 0.95,
+          avacchedaka: { qualificand: "s1::https://s1.example/p1", qualifier: "cite_sources", condition: "tier=tier1", relation: "inherence" },
+          sublated_by: null,
+        },
+      ],
+    });
+    const f = fakeMcp({
+      read_config: makeCfg(),
+      audit_page: makeAudit("a_p3", [
+        { gap_id: "g1", tactic: "cite_sources", evidence_tier: "tier1", predicted_lift_pp: 6, geo_paper_reference: "GEO §3.1", page_locator: "main", rationale: "lower-precision draft: a different angle on cite_sources but with weaker evidence" },
+      ]),
+      generate_brief: makeBrief("brief_g1"),
+    });
+    const r = await runLoopOnce(makeJob(), { mcp: f.client, pratyaksha: client });
+    assert.equal(r.next_step, "buddhi_blocked");
+    assert.equal(r.gaps_filed, 0);
+    assert.equal(r.buddhi?.blocked_briefs, 1);
+    assert.equal(f.calls.find((c) => c.tool === "open_pr"), undefined, "no PR opened when Buddhi blocks all briefs");
+  });
+
+  it("noop pratyaksha gracefully degrades when daemon was started without it", async () => {
+    const f = fakeMcp({
+      read_config: makeCfg(),
+      audit_page: makeAudit("a_p4", [
+        { gap_id: "g1", tactic: "cite_sources", evidence_tier: "tier1", predicted_lift_pp: 9, geo_paper_reference: "GEO §3.1", page_locator: "main", rationale: "x" },
+      ]),
+      generate_brief: makeBrief("brief_g1"),
+      open_pr: makePr(52, "brief_g1"),
+    });
+    const r = await runLoopOnce(makeJob(), { mcp: f.client, pratyaksha: new NoopPratyakshaClient() });
+    assert.equal(r.next_step, "human_review");
+    assert.equal(r.buddhi?.pratyaksha_available, false);
   });
 
   it("audits every seed_page (multi-page audit)", async () => {

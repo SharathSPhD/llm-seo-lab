@@ -1,3 +1,6 @@
 [submodule "tools/attractor-flow"]
 	path = tools/attractor-flow
 	url = https://github.com/SharathSPhD/attractor-flow.git
+[submodule "tools/pratyaksha"]
+	path = tools/pratyaksha
+	url = https://github.com/SharathSPhD/pratyaksha-context-eng-harness.git

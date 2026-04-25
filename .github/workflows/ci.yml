@@ -26,6 +26,12 @@ jobs:
         run: node --experimental-strip-types --test mcp/tests/integration.http.test.ts
       - name: cli-worker loop schema tripwire
         run: node --experimental-strip-types --test packages/cli-worker/src/runners/loop.test.ts
+      - name: Install uv (for pratyaksha integration test)
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Pratyakṣa witness + sublation integration tripwire
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          node --experimental-strip-types --test mcp/tests/pratyaksha.integration.test.ts
       - run: npm run smoke --silent
 
   python-lint:

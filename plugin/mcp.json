@@ -11,6 +11,14 @@
       "env": {
         "NODE_NO_WARNINGS": "1"
       }
+    },
+    "pratyaksha_mcp": {
+      "command": "sh",
+      "args": [
+        "-c",
+        "cd \"${workspaceFolder}/tools/pratyaksha/mcp\" && PATH=\"$PATH:$HOME/.local/bin\" uv run --no-project server.py"
+      ],
+      "description": "Pratyakṣa Context Engineering Harness. AEO loop consumes Sākṣī (witness), detect_conflict, sublate_with_evidence; Avacchedaka store and boundary_compact are consumed transitively."
     }
   }
 }

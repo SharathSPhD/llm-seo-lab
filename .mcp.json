@@ -12,6 +12,14 @@
         "ATTRACTORFLOW_WINDOW": "8"
       },
       "description": "AttractorFlow — Dynamical-systems diagnostics (Lyapunov, regime, bifurcation, basin depth) for Claude Code agents. Vendored as submodule under tools/attractor-flow."
+    },
+    "pratyaksha_mcp": {
+      "command": "sh",
+      "args": [
+        "-c",
+        "cd tools/pratyaksha/mcp && PATH=\"$PATH:$HOME/.local/bin\" uv run --no-project server.py"
+      ],
+      "description": "Pratyakṣa Context Engineering Harness — Avacchedaka-typed context store, sublation-with-evidence, witness invariants (Sākṣī), boundary compaction, and Khyātivāda hallucination classification. Vendored as submodule under tools/pratyaksha. R3 verdict: AEO loop adopts Sākṣī + Sublation + Manas/Buddhi from this server."
     }
   }
 }
