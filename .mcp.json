@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "attractor-flow": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--with",
+        "fastmcp",
+        "--with",
+        "sentence-transformers",
+        "--with",
+        "scikit-learn",
+        "--with",
+        "numpy",
+        "python",
+        "tools/attractor-flow/attractorflow/mcp-server/server.py"
+      ],
+      "env": {
+        "ATTRACTORFLOW_SESSION_ID": "llm-seo-lab",
+        "ATTRACTORFLOW_BUFFER_CAPACITY": "200",
+        "ATTRACTORFLOW_WINDOW": "8"
+      }
+    }
+  }
+}

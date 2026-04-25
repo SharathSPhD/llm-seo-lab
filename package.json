@@ -1,0 +1,23 @@
+{
+  "name": "llm-seo-lab",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Path-breaking AEO/LLM-SEO platform. Closed-loop autonomous citation engineering powered by the Claude Code CLI subscription.",
+  "homepage": "https://github.com/SharathSPhD/llm-seo-lab",
+  "license": "MIT",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "plugin",
+    "mcp"
+  ],
+  "scripts": {
+    "lint": "echo 'Per-package lint not yet wired'",
+    "test": "echo 'Per-package tests not yet wired'",
+    "build": "echo 'Per-package build not yet wired'"
+  },
+  "engines": {
+    "node": ">=20.10.0"
+  },
+  "packageManager": "npm@10.8.0"
+}

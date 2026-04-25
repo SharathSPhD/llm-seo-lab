@@ -1,0 +1,75 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+.yarn/
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.python-version
+
+# Builds
+dist/
+build/
+.next/
+out/
+.turbo/
+.swc/
+*.tsbuildinfo
+
+# Test/coverage
+coverage/
+.nyc_output/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+*.cover
+
+# Environments
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Attractor-flow / Claude Code state
+.attractorflow/
+.claude/sessions/
+.claude/cache/
+
+# Vercel
+.vercel/
+
+# Benchmark raw data (large)
+benchmarks/raw/
+benchmarks/output/
+docs/benchmarks/raw/
+
+# Temporary
+tmp/
+*.tmp
+*.bak
