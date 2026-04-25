@@ -1,0 +1,13 @@
+{
+  "audit_id": "aud_stub_1c67cbce-fcc",
+  "pr_id": "pr:1",
+  "pr_url": "https://github.com/SharathSPhD/SharathSPhD.github.io/pull/1",
+  "gaps_filed": 3,
+  "next_step": "human_review",
+  "buddhi": {
+    "pratyaksha_available": true,
+    "conflicts_detected": 0,
+    "sublations_recorded": 0,
+    "blocked_briefs": 0
+  }
+}
