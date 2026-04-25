@@ -1,0 +1,195 @@
+{
+  "goal": "Design a path-breaking AEO/LLM-SEO platform that closes the loop between measuring AI citation share and acting on the gap, using a Claude Code CLI subscription as the reasoning oracle, priced flat, and validated statistically against SOTA tools on indie sites.",
+  "sketches": {
+    "S1": {
+      "headline": "PR-as-product. The Claude CLI loop audits the customer's repo, drafts the fix as a feature-branch commit, opens a PR with diff plus GEO-pape...",
+      "n_steps": 5,
+      "ftle_final": 0.0623,
+      "ftle_mean": 0.104,
+      "regime_final": "DIVERGING",
+      "regime_confidence": 0.125,
+      "action": "RESTORE_CHECKPOINT",
+      "rationale": "\u03bb=0.062 (moderate divergence). ftle_trend=+0.000. Trajectory expanding away from goal basin.",
+      "goal_distance_initial": 1.1458,
+      "goal_distance_final": 1.1629,
+      "basin_depth": {
+        "basin_depth": 0.199,
+        "stability": "unstable",
+        "variance_of_distances": 0.0245,
+        "mean_distance": 1.1323,
+        "trend": 0.0664
+      },
+      "perturbation": {
+        "stress_text": "PERTURBATION: customer fully blocks all AI crawlers in robots.txt and refuses to merge any PR that touches robots.txt. R",
+        "pre_distance": 1.1629,
+        "post_distance": 1.1526,
+        "delta": -0.0104,
+        "recovery": 0.0104,
+        "pre_regime": "DIVERGING",
+        "post_regime": "DIVERGING",
+        "post_ftle": 0.0661,
+        "robust": true
+      }
+    },
+    "S2": {
+      "headline": "IDE-native autopilot. Everything inside the Cursor IDE plugin. No web dashboard. Plugin surfaces gaps as inline diagnostics, drafts fixes as...",
+      "n_steps": 5,
+      "ftle_final": 0.0991,
+      "ftle_mean": 0.1554,
+      "regime_final": "DIVERGING",
+      "regime_confidence": 0.198,
+      "action": "RESTORE_CHECKPOINT",
+      "rationale": "\u03bb=0.099 (moderate divergence). ftle_trend=+0.000. Trajectory expanding away from goal basin.",
+      "goal_distance_initial": 1.2331,
+      "goal_distance_final": 1.3836,
+      "basin_depth": {
+        "basin_depth": 0.193,
+        "stability": "unstable",
+        "variance_of_distances": 0.0237,
+        "mean_distance": 1.1946,
+        "trend": 0.1121
+      },
+      "perturbation": {
+        "stress_text": "PERTURBATION: customer is a non-developer marketer publishing on Substack with no IDE installed and no git workflow. Re-",
+        "pre_distance": 1.3836,
+        "post_distance": 1.2279,
+        "delta": -0.1557,
+        "recovery": 0.1557,
+        "pre_regime": "DIVERGING",
+        "post_regime": "DIVERGING",
+        "post_ftle": 0.0794,
+        "robust": true
+      }
+    },
+    "S3": {
+      "headline": "Dashboard with one-click apply. Standard SaaS dashboard like AthenaHQ but every recommendation tile has an Apply button that opens a PR via ...",
+      "n_steps": 5,
+      "ftle_final": 0.0827,
+      "ftle_mean": 0.1847,
+      "regime_final": "DIVERGING",
+      "regime_confidence": 0.165,
+      "action": "RESTORE_CHECKPOINT",
+      "rationale": "\u03bb=0.083 (moderate divergence). ftle_trend=+0.000. Trajectory expanding away from goal basin.",
+      "goal_distance_initial": 1.2118,
+      "goal_distance_final": 1.3296,
+      "basin_depth": {
+        "basin_depth": 0.195,
+        "stability": "unstable",
+        "variance_of_distances": 0.0259,
+        "mean_distance": 1.1667,
+        "trend": 0.0876
+      },
+      "perturbation": null
+    },
+    "S4": {
+      "headline": "Continuous-deployment swarm. Many small ephemeral micro-PRs (tens per week) that A/B test themselves. Each micro-PR ships to one page or sub...",
+      "n_steps": 5,
+      "ftle_final": 0.0177,
+      "ftle_mean": -0.0027,
+      "regime_final": "DIVERGING",
+      "regime_confidence": 0.035,
+      "action": "RESTORE_CHECKPOINT",
+      "rationale": "\u03bb=0.018 (moderate divergence). ftle_trend=+0.000. Trajectory expanding away from goal basin.",
+      "goal_distance_initial": 1.189,
+      "goal_distance_final": 1.08,
+      "basin_depth": {
+        "basin_depth": 0.211,
+        "stability": "shallow",
+        "variance_of_distances": 0.0028,
+        "mean_distance": 1.1458,
+        "trend": 0.0206
+      },
+      "perturbation": null
+    },
+    "S5": {
+      "headline": "Inversion: AI engines come to you. Customer publishes llms.txt plus enriched sitemap plus content firehose (RSS, Atom, IndexNow) optimised p...",
+      "n_steps": 5,
+      "ftle_final": 0.1307,
+      "ftle_mean": 0.2223,
+      "regime_final": "DIVERGING",
+      "regime_confidence": 0.261,
+      "action": "RESTORE_CHECKPOINT",
+      "rationale": "\u03bb=0.131 (moderate divergence). ftle_trend=+0.000. Trajectory expanding away from goal basin.",
+      "goal_distance_initial": 0.9165,
+      "goal_distance_final": 1.0567,
+      "basin_depth": {
+        "basin_depth": 0.183,
+        "stability": "unstable",
+        "variance_of_distances": 0.0419,
+        "mean_distance": 1.2055,
+        "trend": 0.1441
+      },
+      "perturbation": {
+        "stress_text": "PERTURBATION: customer's CDN strips all referrer headers and the customer cannot deploy server-side log analytics. Re-ev",
+        "pre_distance": 1.0567,
+        "post_distance": 1.2748,
+        "delta": 0.2181,
+        "recovery": -0.2181,
+        "pre_regime": "DIVERGING",
+        "post_regime": "DIVERGING",
+        "post_ftle": 0.0739,
+        "robust": false
+      }
+    },
+    "S6": {
+      "headline": "Spine-and-leaves CMS layer. CMS plugin (WordPress, Ghost, Substack, Webflow, headless API) maintains one canonical spine page per topic and ...",
+      "n_steps": 5,
+      "ftle_final": 0.0926,
+      "ftle_mean": 0.1988,
+      "regime_final": "DIVERGING",
+      "regime_confidence": 0.185,
+      "action": "RESTORE_CHECKPOINT",
+      "rationale": "\u03bb=0.093 (moderate divergence). ftle_trend=+0.000. Trajectory expanding away from goal basin.",
+      "goal_distance_initial": 1.2885,
+      "goal_distance_final": 1.1577,
+      "basin_depth": {
+        "basin_depth": 0.194,
+        "stability": "unstable",
+        "variance_of_distances": 0.0298,
+        "mean_distance": 1.1597,
+        "trend": 0.0967
+      },
+      "perturbation": null
+    },
+    "S7": {
+      "headline": "Federated benchmark co-op. Customers share anonymised citation outcomes (which fixes worked on which engines for which topics) into a federa...",
+      "n_steps": 5,
+      "ftle_final": 0.1424,
+      "ftle_mean": 0.2191,
+      "regime_final": "DIVERGING",
+      "regime_confidence": 0.285,
+      "action": "RESTORE_CHECKPOINT",
+      "rationale": "\u03bb=0.142 (moderate divergence). ftle_trend=+0.000. Trajectory expanding away from goal basin.",
+      "goal_distance_initial": 1.2127,
+      "goal_distance_final": 1.3578,
+      "basin_depth": {
+        "basin_depth": 0.193,
+        "stability": "unstable",
+        "variance_of_distances": 0.0409,
+        "mean_distance": 1.1132,
+        "trend": 0.1465
+      },
+      "perturbation": null
+    },
+    "S8": {
+      "headline": "Editorial-trust marketplace. PRs from the autonomous loop are reviewed by a network of paid trusted editors (a marketplace) who get a cut of...",
+      "n_steps": 5,
+      "ftle_final": 0.0872,
+      "ftle_mean": 0.1291,
+      "regime_final": "DIVERGING",
+      "regime_confidence": 0.174,
+      "action": "RESTORE_CHECKPOINT",
+      "rationale": "\u03bb=0.087 (moderate divergence). ftle_trend=+0.000. Trajectory expanding away from goal basin.",
+      "goal_distance_initial": 1.1596,
+      "goal_distance_final": 1.2363,
+      "basin_depth": {
+        "basin_depth": 0.201,
+        "stability": "shallow",
+        "variance_of_distances": 0.025,
+        "mean_distance": 1.1196,
+        "trend": 0.0924
+      },
+      "perturbation": null
+    }
+  }
+}
