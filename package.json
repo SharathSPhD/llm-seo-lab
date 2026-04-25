@@ -1,6 +1,6 @@
 {
   "name": "llm-seo-lab",
-  "version": "0.0.1",
+  "version": "0.2.0",
   "private": true,
   "description": "Path-breaking AEO/LLM-SEO platform. Closed-loop autonomous citation engineering powered by the Claude Code CLI subscription.",
   "homepage": "https://github.com/SharathSPhD/llm-seo-lab",

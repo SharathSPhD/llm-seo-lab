@@ -14,11 +14,12 @@ The AEO / GEO / LLM-SEO category in 2026 is dominated by **monitoring dashboards
 
 | Surface | Purpose | Status |
 |---|---|---|
-| **Cursor plugin** (`plugin/`) + `aeo-loop` agent | Developer-facing AEO workflows inside Cursor: `/aeo:bootstrap`, `/aeo:loop`, `/aeo:audit`, `/aeo:track`, `/aeo:fix`, `/aeo:results`, `/aeo:compete` | v0.1.0-alpha |
-| **MCP server** (`mcp/`) | 12 tools (`audit_page`, `track_citations`, `generate_brief`, `emit_schema`, `compare_competitors`, `oracle_query`, …) + 3 widgets, exposed over JSON-RPC to any MCP client | v0.1.0-alpha |
-| **Claude Code skills** (`skills/`) | `aeo-audit`, `citation-oracle-loop`, `content-brief-from-gap`, `schema-generator`, `freshness-radar`, `competitive-citation-intel` | v0.1.0-alpha |
-| **Next.js web dashboard** (`apps/web`) | Consumer-facing surface; orchestrates the Claude Code CLI worker via the MCP HTTP bridge and a WebSocket | v0.1.0-alpha |
-| **CLI worker daemon** (`packages/cli-worker`) | Drives the Claude Code CLI subprocess; queues; rate-limits to subscription quotas; streams events to the web app over WebSocket | v0.1.0-alpha |
+| **Dual-target plugin** (`plugin/`) | Same source tree, two manifests (`.cursor-plugin/plugin.json` for Cursor, `.claude-plugin/plugin.json` for Claude Code CLI). Commands `/aeo:bootstrap`, `/aeo:loop`, `/aeo:audit`, `/aeo:track`, `/aeo:fix`, `/aeo:results`, `/aeo:compete`. Hooks: `SessionStart` (Sākṣī witness), `PreToolUse` (claude-CLI guard), `Stop` (compaction nudge). | **v0.2.0** |
+| **MCP server** (`mcp/`) | 16 JSON-RPC tools at `POST http://127.0.0.1:7301/rpc` — `audit_page`, `track_citations`, `generate_brief`, `emit_schema`, `compare_competitors`, `oracle_query`, `read_config`, `open_pr` (with live clone+commit+push+create mode), `list_sites`, `read_latest_audit`, `list_prs`, `read_citation_trend`, plus 3 widgets. Token-bucket rate limiting, fail-open Claude fallbacks, full HTTP integration test in CI. | **v0.2.0** |
+| **Pratyakṣa epistemology gate** (vendored at `tools/pratyaksha/`) | Witness invariants (Sākṣī), conflict detection, sublation-with-evidence. Wired into the AEO loop runner as the Manas/Buddhi pair: Manas drafts the brief, Buddhi consults Pratyakṣa before the PR opens. Adoption rationale in `docs/decisions/2026-04-26-pratyaksha-integration.md`. | **v0.2.0** |
+| **Claude Code skills** (`skills/`) | `aeo-audit`, `citation-oracle-loop`, `content-brief-from-gap`, `schema-generator`, `freshness-radar`, `competitive-citation-intel` | v0.2.0 |
+| **Next.js web dashboard** (`apps/web`) | Consumer-facing surface; orchestrates the Claude Code CLI worker via the MCP HTTP bridge (`POST /rpc` on `:7301`) and a WebSocket | v0.2.0 |
+| **CLI worker daemon** (`packages/cli-worker`) | Drives the Claude Code CLI subprocess; persistent JSONL job queue; rate-limits to subscription quotas; streams events to the web app over WebSocket; honours `payload.dry_run` for safe end-to-end smokes | v0.2.0 |
 
 ## Repository layout
 
@@ -65,37 +66,48 @@ TRIZ forces the design space wide open by making the engineer state and resolve 
 
 ## Quickstart
 
-> **Prerequisites:** Node ≥ 20.10, Python ≥ 3.11, the [Claude Code CLI](https://docs.anthropic.com/claude-code/quickstart) on `PATH`, and (recommended) [`uv`](https://docs.astral.sh/uv/) for the Python MCP server.
+> **Prerequisites:** Node ≥ 20.10, the [Claude Code CLI](https://docs.anthropic.com/claude-code/quickstart) on `PATH` (subscription, not API), the [`gh` CLI](https://cli.github.com/) authenticated against the customer repo, and (recommended) [`uv`](https://docs.astral.sh/uv/) so the Pratyakṣa Buddhi gate can come online. Without `uv` the loop still runs — it falls back to a permissive no-op gate.
 
 ```bash
-git clone https://github.com/SharathSPhD/llm-seo-lab.git
+git clone --recurse-submodules https://github.com/SharathSPhD/llm-seo-lab.git
 cd llm-seo-lab
 ./scripts/install.sh
 ```
 
-The installer verifies your toolchain, installs npm workspaces, syncs Python dependencies for the MCP server, and prints the next steps. Then:
+The installer verifies your toolchain, installs npm workspaces, initialises the `attractor-flow` and `pratyaksha` submodules, and prints the next steps. The MCP server is TypeScript; there is no Python install step under `mcp/` (an earlier version of the script attempted `uv pip install` there — that was an architecture-review finding and has been removed).
+
+### Install the Cursor / Claude Code plugin (in this repo)
 
 ```bash
-# 1. Start the cli-worker daemon (job queue, WebSocket, /health)
-npm run start --workspace=@llm-seo-lab/cli-worker
-
-# 2. In another shell, start the Next.js dashboard
-npm run dev --workspace=@llm-seo-lab/web
-open http://localhost:3030
-
-# 3. In your target site's repo, open Cursor and run
-#    /aeo:bootstrap   # writes .llm-seo-lab/config.yaml
-#    /aeo:loop        # one full audit → brief → PR cycle
-
-# 4. Verify the daemon is up
-curl -s http://localhost:7303/health | jq .
+# From inside Claude Code:
+/plugin marketplace add /absolute/path/to/llm-seo-lab
+/plugin install llm-seo-lab@llm-seo-lab
+# Verify:
+/aeo:status
 ```
 
-End-to-end smoke test (boots the daemon on ephemeral ports, hits `/health`, completes a WebSocket handshake, sends `SIGTERM`, asserts a clean exit):
+The same source tree under `plugin/` ships both manifests (`.cursor-plugin/plugin.json` and `.claude-plugin/plugin.json`).
+
+### Run the closed loop
 
 ```bash
-npm run smoke
+# 1. Start the MCP server on :7301
+node --experimental-strip-types --no-warnings \
+  mcp/bin/llm-seo-lab-mcp.mjs --port=7301 --data-dir="$(pwd)/data"
+
+# 2. Smoke the loop without opening a PR (Sākṣī + Manas + Buddhi all live):
+node --experimental-strip-types --no-warnings \
+  scripts/aeo-live-run.mjs --site sharathsphd-githubio --dry-run
+
+# 3. Real run that opens a PR against the configured customer repo:
+node --experimental-strip-types --no-warnings \
+  scripts/aeo-live-run.mjs --site sharathsphd-githubio
 ```
+
+The first real run on `sharathsphd.github.io` is captured under
+[`docs/use-cases/P3-live-run-2026-04-25/`](docs/use-cases/P3-live-run-2026-04-25/README.md)
+with the resulting PR at
+<https://github.com/SharathSPhD/SharathSPhD.github.io/pull/1>.
 
 ### Default ports
 
@@ -104,7 +116,8 @@ npm run smoke
 | Next.js dashboard | `3030` | `next dev --port` |
 | cli-worker HTTP `/health` | `7303` | `--http-port` |
 | cli-worker WebSocket | `7302` | `--ws-port` |
-| MCP server (HTTP bridge) | `7301` | `LLM_SEO_LAB_MCP_URL` |
+| MCP server (`POST /rpc`) | `7301` | `LLM_SEO_LAB_MCP_URL` |
+| Pratyakṣa MCP (stdio via `uv run`) | n/a | bundled with the loop runner |
 
 ### Useful scripts
 

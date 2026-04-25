@@ -1,6 +1,6 @@
 {
   "name": "@llm-seo-lab/web",
-  "version": "0.1.0-alpha.1",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Next.js dashboard for llm-seo-lab. Renders site list, audit summary, PR queue, citation trend, and statistical results, talks to the MCP server over HTTP, and live-subscribes to the cli-worker daemon over WebSocket.",

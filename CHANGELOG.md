@@ -6,18 +6,94 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+(Nothing yet — `v0.2.0` cut on 2026-04-25.)
+
+## [0.2.0] — 2026-04-25 — "Closed loop, real PR, witness gate"
+
+This release closes the integration drift the adversarial architecture
+review (`docs/reviews/2026-04-25-adversarial-architecture-review.md`)
+flagged, upgrades the plugin to a real dual-target Cursor + Claude
+Code CLI plugin, integrates the Pratyakṣa epistemology gate via TRIZ-
++ attractor-flow-driven adoption analysis, and proves the loop end-
+to-end by opening a real PR against a Phase-7 site.
+
 ### Added
-- One-shot installer script `scripts/install.sh` (Node + Python + Claude Code CLI verification, npm workspace install, `uv sync` fallback to `pip`).
-- End-to-end smoke test `scripts/smoke.mjs` (`npm run smoke`) that boots the cli-worker daemon on ephemeral ports, hits `/health`, performs a WebSocket handshake, and asserts a clean `SIGTERM` exit.
-- README quickstart with default ports table and useful-scripts cheatsheet.
+- **Pratyakṣa Buddhi gate** wired into the AEO loop runner
+  (`packages/cli-worker/src/runners/loop.ts`). Manas drafts the brief
+  via `claude --print`; Buddhi calls `pratyaksha.context_retrieve`,
+  `pratyaksha.detect_conflict`, and `pratyaksha.sublate_with_evidence`
+  before `open_pr`. Adoption rationale in
+  `docs/decisions/2026-04-26-pratyaksha-integration.md`.
+- **Sākṣī (witness) hook** at `plugin/scripts/aeo-sakshi.sh`. Pins the
+  AEO invariants ("subscription-only Claude CLI; no synthetic
+  citations; never overwrite a recommendation, sublate it") at
+  `SessionStart`.
+- **Live PR mode** for the `open_pr` MCP tool: clones the customer
+  repo into a temp dir, writes one `docs/aeo-briefs/<brief_id>.md`
+  per cleared brief, commits as `llm-seo-lab[bot]`, pushes, and runs
+  `gh pr create`.
+- **Read-side MCP tools** the web layer was already calling: `list_sites`,
+  `read_latest_audit`, `list_prs`, `read_citation_trend`.
+- **Dual-target plugin manifest** — `plugin/.claude-plugin/plugin.json`
+  alongside `plugin/.cursor-plugin/plugin.json`, plus
+  `.claude-plugin/marketplace.json` at the repo root.
+- **Live-run reference harness** `scripts/aeo-live-run.mjs` — one-shot
+  end-to-end driver that streams every loop event into
+  `docs/use-cases/<run_id>/transcript.jsonl`.
+- **Phase-7 evidence package** `docs/use-cases/P3-live-run-2026-04-25/`
+  with the resulting PR at
+  <https://github.com/SharathSPhD/SharathSPhD.github.io/pull/1>.
+- **Cross-process tripwire test** `mcp/tests/pratyaksha.integration.test.ts`
+  asserting witness + sublation contracts against the real Python
+  Pratyakṣa MCP server. Runs in CI (with `uv` provisioned in the job).
+- **TRIZ + attractor-flow R3 artifacts** — contradiction cards, session
+  log (`.triz/session.jsonl`), and per-candidate trajectory analysis
+  in `docs/triz/r3-pratyaksha-attractor.json`.
+- **`docs/limitations.md`** — honest scope statement: Playwright
+  citation tracker is still stubbed, audit/brief content can fall
+  back to a deterministic stub, T+14 lift is not yet measured.
+- **Per-phase ralph-loop completeness reports** under `docs/ralph-runs/`.
 
 ### Changed
-- `cli-worker` `daemon start` now blocks until `SIGTERM`/`SIGINT` instead of exiting immediately, so the daemon can actually serve requests when launched from `npm start` or `install.sh`.
-- Reconciled default ports across `apps/web`, `vercel.json`, and `scripts/install.sh` to match the cli-worker defaults: HTTP `/health` on `7303`, WebSocket on `7302`.
+- **MCP HTTP transport** standardised on `POST http://127.0.0.1:7301/rpc`.
+  The web layer used to call `:7374/mcp`; this release reconciles every
+  caller (`apps/web`, `cli-worker`, `scripts/aeo-live-run.mjs`).
+- **`audit_page` and `generate_brief`** are now fail-open: when the
+  Claude CLI errors or returns unparseable output, both return a
+  deterministic stub clearly marked `claude_model: "fallback-stub"`
+  so the loop can still produce a reviewable PR. Strict-path tests
+  remain in `mcp/tests/tools.test.ts`.
+- **Loop runner result envelope** — added a `buddhi` block that
+  records `pratyaksha_available`, `conflicts_detected`,
+  `sublations_recorded`, and `blocked_briefs`. Added a
+  `next_step: "buddhi_blocked"` terminal state.
+- **`scripts/install.sh`** rewritten: dropped the spurious
+  `uv pip install -e .` against `mcp/` (mcp/ is TypeScript), added
+  `gh` auth check, added `uv` check, and added `git submodule update`
+  bootstrap so the Pratyakṣa gate works out of the box.
+- **README** rewritten for the v0.2.0 reality: dual-target plugin
+  install path, live-run quickstart, link to the first real PR,
+  Pratyakṣa dependency surfaced, single canonical port/path for MCP.
 
 ### Fixed
-- `apps/web/tsconfig.json` no longer pulls shared-package test files into the web typecheck (`rootDir` and `include` reduced to the app's own sources).
-- `next.config.ts` moves `typedRoutes` out of `experimental` (Next.js 15 deprecation).
+- `apps/web/lib/mcp-client.ts` no longer points at the wrong
+  `:7374/mcp` endpoint.
+- `cli-worker/src/runners/loop.ts` now unwraps the `{ok, value}`
+  envelope consistently and uses the real MCP tool argument names
+  (`page_url`, `repo_path`, etc.) instead of the legacy `site_id`-
+  only signatures.
+- Hooks under `plugin/scripts/` no longer rely on the missing GNU
+  `timeout` binary on macOS — they handle their own timeouts via an
+  embedded Python `subprocess.Popen`.
+
+### Known limitations (full list in `docs/limitations.md`)
+- Playwright citation crawler still stubbed; T+14 lift not measured.
+- Audit/brief content can be a `fallback-stub` if the Claude CLI does
+  not return a fenced JSON block.
+- Pratyakṣa Buddhi gate degrades to no-op when `uv` is missing.
+- One Phase-7 site captured (the pattern is reusable for the other four).
+- Cursor marketplace publication intentionally deferred — install via
+  `/plugin marketplace add <local-path>`.
 
 ## [0.1.0-alpha.1] — 2026-04-25 — "Phase 5 build complete"
 
