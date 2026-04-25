@@ -1,0 +1,28 @@
+{
+  "topic": "static site SEO",
+  "user_site": "technektar.dev",
+  "competitor_sites": ["smashingmagazine.com", "css-tricks.com", "web.dev", "vercel.com", "nextjs.org"],
+  "citation_map": {
+    "perplexity": {
+      "How do I add JSON-LD to a Next.js page?": ["nextjs.org", "vercel.com"],
+      "What is GEO vs SEO?": ["web.dev", "smashingmagazine.com"],
+      "How to host a static blog?": ["technektar.dev", "vercel.com"],
+      "What is llms.txt?": ["smashingmagazine.com"],
+      "How to track AI citations?": ["css-tricks.com", "web.dev"]
+    },
+    "chatgpt": {
+      "How do I add JSON-LD to a Next.js page?": ["nextjs.org"],
+      "What is GEO vs SEO?": ["smashingmagazine.com"],
+      "How to host a static blog?": ["vercel.com"],
+      "What is llms.txt?": ["smashingmagazine.com", "vercel.com"],
+      "How to track AI citations?": ["css-tricks.com"]
+    },
+    "claude_ai": {
+      "How do I add JSON-LD to a Next.js page?": ["nextjs.org", "technektar.dev"],
+      "What is GEO vs SEO?": ["technektar.dev"],
+      "How to host a static blog?": ["technektar.dev"],
+      "What is llms.txt?": ["smashingmagazine.com"],
+      "How to track AI citations?": ["web.dev"]
+    }
+  }
+}

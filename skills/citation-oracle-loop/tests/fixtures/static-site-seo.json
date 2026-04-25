@@ -1,0 +1,12 @@
+{
+  "site_url": "https://technektar.dev",
+  "topic": "static site SEO",
+  "engines": ["claude_ai", "perplexity", "chatgpt", "gemini", "google_aio"],
+  "question_bank": [
+    "What are best practices for SEO on a static site?",
+    "How do I add a sitemap.xml to a Next.js static export?",
+    "What is the difference between AEO and SEO?",
+    "How do AI search engines pick which sources to cite?",
+    "What is GEO (Generative Engine Optimization)?"
+  ]
+}

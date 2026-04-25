@@ -39,3 +39,20 @@ jobs:
         run: |
           export PATH="$HOME/.cargo/bin:$PATH"
           uvx ruff check .
+
+  skill-harnesses:
+    name: Skill harness tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Run all skill harnesses
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          bash skills/run-all-tests.sh

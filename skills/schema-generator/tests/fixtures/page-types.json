@@ -1,0 +1,44 @@
+{
+  "fixtures": [
+    {
+      "page_type": "Article",
+      "page_url": "https://example.com/a",
+      "page_title": "How LLM citation share is measured",
+      "facts": {
+        "author_name": "Aysha Aravali",
+        "publisher_name": "TechNektar",
+        "date_published": "2026-04-01"
+      }
+    },
+    {
+      "page_type": "FAQPage",
+      "page_url": "https://example.com/faq",
+      "page_title": "AEO FAQ",
+      "facts": {
+        "qas": [
+          {"q": "What is AEO?", "a": "Answer Engine Optimization."},
+          {"q": "Does it differ from SEO?", "a": "Yes — it targets LLM-grounded answer engines."}
+        ]
+      }
+    },
+    {
+      "page_type": "HowTo",
+      "page_url": "https://example.com/howto",
+      "page_title": "How to add JSON-LD to a Next.js page",
+      "facts": {
+        "steps": ["Add a <script> tag", "Set type to application/ld+json", "Embed the JSON object"]
+      }
+    },
+    {
+      "page_type": "Product",
+      "page_url": "https://example.com/p",
+      "page_title": "llm-seo-lab Subscription",
+      "facts": {
+        "description": "AEO platform that closes the loop.",
+        "brand_name": "llm-seo-lab",
+        "price": 49.0,
+        "currency": "USD"
+      }
+    }
+  ]
+}

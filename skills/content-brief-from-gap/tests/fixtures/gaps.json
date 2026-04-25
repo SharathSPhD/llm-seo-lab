@@ -1,0 +1,31 @@
+{
+  "gaps": [
+    {
+      "gap_id": "cite-1",
+      "tactic": "cite_sources",
+      "predicted_lift_pp": 12,
+      "evidence_tier": "tier1",
+      "geo_paper_reference": "KDD 2024 GEO §4.2 Cite Sources",
+      "page_locator": "article > p:first-of-type",
+      "rationale": "Page lacks inline links to primary sources."
+    },
+    {
+      "gap_id": "stat-1",
+      "tactic": "statistics_addition",
+      "predicted_lift_pp": 10,
+      "evidence_tier": "tier1",
+      "geo_paper_reference": "KDD 2024 GEO §4.2 Statistics Addition",
+      "page_locator": "article",
+      "rationale": "Page lacks numeric statistics with sources."
+    },
+    {
+      "gap_id": "schema-1",
+      "tactic": "schema_coverage",
+      "predicted_lift_pp": 7,
+      "evidence_tier": "tier2",
+      "geo_paper_reference": "schema.org structured data",
+      "page_locator": "head",
+      "rationale": "Page emits no JSON-LD."
+    }
+  ]
+}

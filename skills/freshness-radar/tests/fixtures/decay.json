@@ -1,0 +1,27 @@
+{
+  "pages": [
+    {
+      "page_url": "https://technektar.dev/post-a",
+      "last_updated": "2025-10-01",
+      "citation_history": [
+        {"date": "2026-01-26", "share": 0.42},
+        {"date": "2026-04-25", "share": 0.18}
+      ]
+    },
+    {
+      "page_url": "https://technektar.dev/post-b",
+      "last_updated": "2026-01-15",
+      "citation_history": [
+        {"date": "2026-01-26", "share": 0.30},
+        {"date": "2026-04-25", "share": 0.23}
+      ]
+    },
+    {
+      "page_url": "https://technektar.dev/post-c",
+      "last_updated": "2026-04-23",
+      "citation_history": [
+        {"date": "2026-04-23", "share": 0.10}
+      ]
+    }
+  ]
+}
