@@ -1,0 +1,11 @@
+{
+  "audit_id": "aud_stub_46ace6fc-34c",
+  "gaps_filed": 3,
+  "next_step": "human_review",
+  "buddhi": {
+    "pratyaksha_available": true,
+    "conflicts_detected": 0,
+    "sublations_recorded": 0,
+    "blocked_briefs": 0
+  }
+}

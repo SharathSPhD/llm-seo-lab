@@ -147,7 +147,14 @@ test("audit_page parses the Claude JSON block", async () => {
   if (r.ok) assert.equal(r.value.scores.cite_sources, 80);
 });
 
-test("audit_page surfaces parse failure when JSON block absent", async () => {
+test("audit_page falls back to a deterministic stub when JSON block is absent", async () => {
+  /**
+   * Loop continuity: when Claude does not return a fenced JSON block we
+   * must produce a stub `PageAuditResult` (clearly marked
+   * `claude_model: "fallback-stub"`) rather than failing the whole loop.
+   * The strict path is still covered by the unit test on
+   * `parseAuditFromClaude` and by integration tests against the real CLI.
+   */
   const ctx = makeCtx({
     workers: {
       ...makeCtx().workers,
@@ -155,7 +162,12 @@ test("audit_page surfaces parse failure when JSON block absent", async () => {
     },
   });
   const r = await auditPage.handler({ page_url: "https://x", page_html: "<html></html>" }, ctx);
-  assert.equal(r.ok, false);
+  assert.equal(r.ok, true);
+  if (r.ok) {
+    assert.equal(r.value.claude_model, "fallback-stub");
+    assert.ok(r.value.gaps.length >= 1, "stub audit should surface at least one Tier-1 gap");
+    assert.ok(r.value.gaps.every((g) => g.evidence_tier === "tier1"));
+  }
 });
 
 test("generate_brief falls back to deterministic stub when Claude returns no JSON", async () => {
@@ -223,6 +235,93 @@ test("open_pr extracts PR number from gh stdout", async () => {
     assert.equal(r.value.state, "open");
   }
   assert.ok(captured.includes("--title"));
+});
+
+test("open_pr live mode: clones, commits, pushes, then opens PR", async () => {
+  /**
+   * The live path is the one Phase R5 needs end-to-end. We exercise the full
+   * stage sequence without touching the network by injecting fake git/gh CLIs
+   * and asserting the ordered shell-call ledger. The fake `git status` returns
+   * a non-empty diff so the no-op commit guard does not abort.
+   */
+  const calls: { cmd: string; args: string[]; cwd?: string }[] = [];
+  const fakeGit = async (args: string[], opts?: { cwd?: string }): Promise<{ stdout: string; code: number }> => {
+    calls.push(opts?.cwd ? { cmd: "git", args, cwd: opts.cwd } : { cmd: "git", args });
+    if (args[0] === "status") return { stdout: " M docs/aeo/brief.md\n", code: 0 };
+    return { stdout: "", code: 0 };
+  };
+  const fakeGh = async (args: string[], opts?: { cwd?: string }): Promise<{ stdout: string; code: number }> => {
+    calls.push(opts?.cwd ? { cmd: "gh", args, cwd: opts.cwd } : { cmd: "gh", args });
+    return { stdout: "https://github.com/SharathSPhD/sharathsphd.github.io/pull/77\n", code: 0 };
+  };
+
+  const r = await openPr.handler({
+    repo_path: "SharathSPhD/sharathsphd.github.io",
+    branch: "aeo/brief-007",
+    brief_id: "b007",
+    pr_title: "AEO: lift FAQ structured data on /about",
+    pr_body: "body",
+    files: [{ path: "docs/aeo/brief.md", content: "# Brief\n" }],
+    gitCli: fakeGit,
+    ghCli: fakeGh,
+  }, makeCtx());
+
+  assert.equal(r.ok, true, JSON.stringify(r));
+  if (r.ok) {
+    assert.equal(r.value.pr_number, 77);
+    assert.match(r.value.pr_url, /\/pull\/77/);
+  }
+
+  const stages = calls.map((c) => `${c.cmd} ${c.args[0]}`);
+  assert.deepEqual(stages, [
+    "git clone",
+    "git checkout",
+    "git add",
+    "git status",
+    "git -c",
+    "git push",
+    "gh pr",
+  ]);
+
+  const cloneCall = calls[0]!;
+  assert.ok(cloneCall.args.includes("https://github.com/SharathSPhD/sharathsphd.github.io.git"));
+  assert.ok(cloneCall.args.includes("--branch"));
+  assert.ok(cloneCall.args.includes("main"));
+
+  const pushCall = calls.find((c) => c.cmd === "git" && c.args[0] === "push")!;
+  assert.deepEqual(pushCall.args, ["push", "-u", "origin", "aeo/brief-007"]);
+
+  const ghCall = calls.find((c) => c.cmd === "gh")!;
+  assert.ok(ghCall.args.includes("--head"));
+  assert.ok(ghCall.args.includes("aeo/brief-007"));
+  assert.ok(ghCall.cwd, "gh pr create must run inside the cloned worktree");
+});
+
+test("open_pr live mode: refuses to commit when diff is empty", async () => {
+  const fakeGit = async (args: string[]): Promise<{ stdout: string; code: number }> => {
+    if (args[0] === "status") return { stdout: "", code: 0 };
+    return { stdout: "", code: 0 };
+  };
+  const fakeGh = async (): Promise<{ stdout: string; code: number }> => ({
+    stdout: "should not be called", code: 0,
+  });
+
+  const r = await openPr.handler({
+    repo_path: "SharathSPhD/sharathsphd.github.io",
+    branch: "aeo/brief-noop",
+    brief_id: "b-noop",
+    pr_title: "noop",
+    pr_body: "noop",
+    files: [{ path: "x.md", content: "y" }],
+    gitCli: fakeGit,
+    ghCli: fakeGh,
+  }, makeCtx());
+
+  assert.equal(r.ok, false);
+  if (!r.ok) {
+    assert.equal(r.error.code, "INVALID_INPUT");
+    assert.match(r.error.message, /no file changes/);
+  }
 });
 
 test("read_pr_status parses gh JSON", async () => {
