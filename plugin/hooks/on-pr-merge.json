@@ -1,0 +1,25 @@
+{
+  "$schema": "https://cursor.sh/plugins/hook-schema.json",
+  "name": "on-pr-merge",
+  "description": "When a PR with the aeo-fix label is merged, schedule a citation re-measurement after measurement_window_days and notify the aeo-loop agent.",
+  "events": ["pr.merged"],
+  "filter": {
+    "labels": ["aeo-fix"]
+  },
+  "action": {
+    "type": "command",
+    "command": "node",
+    "args": [
+      "--experimental-strip-types",
+      "--no-warnings",
+      "${workspaceFolder}/packages/cli-worker/src/hooks/schedule-measurement.ts",
+      "--pr-id",
+      "${event.pr.number}",
+      "--repo",
+      "${event.pr.repo}",
+      "--merged-at",
+      "${event.pr.merged_at}"
+    ],
+    "timeoutMs": 30000
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://cursor.sh/plugins/schema.json",
+  "name": "llm-seo-lab",
+  "version": "0.1.0-alpha.1",
+  "displayName": "LLM SEO Lab",
+  "description": "Closed-loop autonomous AEO/LLM-SEO citation engineering. Audits your site, drafts the fix as a PR, measures the lift after merge.",
+  "author": "SharathSPhD",
+  "repository": "https://github.com/SharathSPhD/llm-seo-lab",
+  "license": "MIT",
+  "categories": ["seo", "content", "automation"],
+  "keywords": ["aeo", "llm-seo", "geo", "citation", "claude-code"],
+  "components": {
+    "commands": "./commands",
+    "agents": "./agents",
+    "hooks": "./hooks",
+    "skills": "./skills",
+    "mcpServers": "./mcp.json"
+  },
+  "engines": {
+    "cursor": ">=0.50.0"
+  }
+}

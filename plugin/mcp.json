@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "llm-seo-lab": {
+      "command": "node",
+      "args": [
+        "--experimental-strip-types",
+        "--no-warnings",
+        "${workspaceFolder}/mcp/bin/llm-seo-lab-mcp.mjs",
+        "--stdio"
+      ],
+      "env": {
+        "NODE_NO_WARNINGS": "1"
+      }
+    }
+  }
+}
