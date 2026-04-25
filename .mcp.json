@@ -1,25 +1,17 @@
 {
   "mcpServers": {
-    "attractor-flow": {
-      "command": "uv",
+    "attractorflow_mcp": {
+      "command": "sh",
       "args": [
-        "run",
-        "--with",
-        "fastmcp",
-        "--with",
-        "sentence-transformers",
-        "--with",
-        "scikit-learn",
-        "--with",
-        "numpy",
-        "python",
-        "tools/attractor-flow/attractorflow/mcp-server/server.py"
+        "-c",
+        "cd tools/attractor-flow/attractorflow/mcp-server && PATH=\"$PATH:$HOME/.local/bin\" uv run --no-project server.py"
       ],
       "env": {
         "ATTRACTORFLOW_SESSION_ID": "llm-seo-lab",
         "ATTRACTORFLOW_BUFFER_CAPACITY": "200",
         "ATTRACTORFLOW_WINDOW": "8"
-      }
+      },
+      "description": "AttractorFlow — Dynamical-systems diagnostics (Lyapunov, regime, bifurcation, basin depth) for Claude Code agents. Vendored as submodule under tools/attractor-flow."
     }
   }
 }

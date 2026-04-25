@@ -1,0 +1,3 @@
+[submodule "tools/attractor-flow"]
+	path = tools/attractor-flow
+	url = https://github.com/SharathSPhD/attractor-flow.git
