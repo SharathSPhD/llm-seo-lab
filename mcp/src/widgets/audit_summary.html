@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Audit Summary</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; padding: 12px; background: #fafafa; color: #111; }
+    .scores { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 8px 0; }
+    .score { text-align: center; padding: 12px 6px; border: 1px solid #ddd; border-radius: 6px; background: #fff; }
+    .score .v { font-size: 18px; font-weight: 600; }
+    .score .l { font-size: 10px; opacity: 0.7; }
+    .gap { padding: 8px; border-left: 4px solid #f59e0b; margin: 6px 0; background: #fff; }
+    .gap .tier1 { color: #047857; font-weight: 600; }
+    .lift { font-weight: 600; color: #047857; }
+  </style>
+</head>
+<body>
+  <h2>Audit summary</h2>
+  <div id="scores" class="scores"></div>
+  <h3>Gaps</h3>
+  <div id="gaps"></div>
+  <script>
+    const audit = window.LLM_SEO_LAB?.audit ?? { scores: {}, gaps: [] };
+    const axes = ["cite_sources","quotation_addition","statistics_addition","authoritative_tone","schema_coverage"];
+    const sc = document.getElementById("scores");
+    for (const a of axes) {
+      const d = document.createElement("div"); d.className = "score";
+      d.innerHTML = `<div class="v">${audit.scores[a] ?? 0}</div><div class="l">${a}</div>`;
+      sc.appendChild(d);
+    }
+    const gd = document.getElementById("gaps");
+    for (const g of audit.gaps) {
+      const div = document.createElement("div"); div.className = "gap";
+      div.innerHTML = `<div><span class="${g.evidence_tier}">${g.tactic}</span> · <span class="lift">+${g.predicted_lift_pp}pp</span></div><div>${g.rationale}</div><div style="font-size:11px;opacity:0.7">${g.geo_paper_reference}</div>`;
+      gd.appendChild(div);
+    }
+  </script>
+</body>
+</html>
