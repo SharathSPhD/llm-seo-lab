@@ -1,0 +1,13 @@
+{
+  "name": "llm-seo-lab",
+  "version": "0.2.0",
+  "description": "Closed-loop autonomous AEO/LLM-SEO citation engineering. Audits your site, drafts the fix as a PR, measures the lift after merge. Powered by the Claude Code subscription CLI — no API keys.",
+  "author": {
+    "name": "SharathSPhD",
+    "url": "https://github.com/SharathSPhD"
+  },
+  "homepage": "https://github.com/SharathSPhD/llm-seo-lab",
+  "repository": "https://github.com/SharathSPhD/llm-seo-lab",
+  "license": "MIT",
+  "keywords": ["aeo", "llm-seo", "geo", "citation", "claude-code", "rag", "search"]
+}

@@ -1,7 +1,7 @@
 {
   "$schema": "https://cursor.sh/plugins/schema.json",
   "name": "llm-seo-lab",
-  "version": "0.1.0-alpha.1",
+  "version": "0.2.0",
   "displayName": "LLM SEO Lab",
   "description": "Closed-loop autonomous AEO/LLM-SEO citation engineering. Audits your site, drafts the fix as a PR, measures the lift after merge.",
   "author": "SharathSPhD",

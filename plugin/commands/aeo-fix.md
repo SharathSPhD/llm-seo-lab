@@ -1,43 +1,55 @@
 ---
 name: aeo:fix
-description: Turn an audit's top gaps into a small, reviewable PR. Drafts revised page sections via the content-brief-from-gap skill, emits JSON-LD via the schema-generator skill, opens a PR via the open_pr MCP tool.
-args:
-  - name: audit_path
-    type: string
-    required: false
-    description: Path to a specific .llm-seo-lab/audits/<ts>/audits.json. Defaults to the most recent one.
-  - name: max_gaps
-    type: number
-    required: false
-    description: Maximum number of gaps to address in this PR (default 3, hard cap 5 to keep PRs reviewable).
+description: Turn an audit's top Tier-1 gaps into a small reviewable PR via the cli-worker loop runner.
+argument-hint: "site_id=<id>"
+allowed-tools: Bash
 ---
 
-# /aeo:fix
+You are running `aeo:fix` for the **llm-seo-lab** plugin.
 
-Convert audit findings into a small PR.
+`$ARGUMENTS` is space-separated `key=value`. Required: `site_id`.
 
-## What this does
+This command **delegates to the cli-worker loop runner**, which already implements the full audit→filter→brief→PR pipeline and writes per-step artefacts to `data/sites/<site_id>/`.
 
-1. Loads the most recent audits.json (or the one passed via `--audit-path`).
-2. Filters gaps to Tier-1, predicted_lift_pp >= `evidence_policy.min_predicted_lift_pp`, and at most `max_gaps`.
-3. For each surviving gap:
-   - Calls MCP tool `generate_brief` (delegates to `content-brief-from-gap` skill) to draft the revised section.
-   - If the gap is `add_schema_markup`, also calls MCP tool `emit_schema` (delegates to `schema-generator` skill) to produce JSON-LD.
-4. Stages the diff in a fresh branch `aeo-fix/<timestamp>`.
-5. Calls MCP tool `open_pr` with title and body templated from the gap list, including:
-   - Predicted lift per gap.
-   - GEO-paper reference per gap.
-   - The `pre_audit_id` field linking back to audits.json.
-6. Records the PR id in `.llm-seo-lab/prs/<pr_id>.json` for the on-pr-merge hook.
+## Step 1 — confirm the SiteConfig is healthy
 
-## Behaviour
+```bash
+"${CLAUDE_PLUGIN_ROOT}/scripts/aeo-mcp.sh" read_config '{"site_id":"<SITE_ID>"}'
+```
 
-- Refuses to open more than one open PR per site at a time (configurable via SiteConfig `pr_policy.max_open_prs`).
-- Default branch base = `main`; override via `--base`.
-- Uses the human-voice guard from the `content-brief-from-gap` skill: brief instructs the writer to preserve voice, not flatten it.
-- Substack/Ghost/Webflow substrates: instead of opening a PR, generate a `.llm-seo-lab/drafts/<gap_id>.md` and stop with a "manual publish required" message.
+Refuse to continue if this errors.
+
+Read back the `seed_pages` and `max_gaps_per_pr` fields. Tell the user how many pages will be audited and how many gaps will be bundled at most.
+
+## Step 2 — submit a loop job to the cli-worker daemon
+
+The cli-worker daemon listens on `http://127.0.0.1:7300` (override via `LLM_SEO_LAB_CLI_WORKER_URL`). Submit a job:
+
+```bash
+CLI_WORKER_URL="${LLM_SEO_LAB_CLI_WORKER_URL:-http://127.0.0.1:7300}"
+curl -sS -X POST "${CLI_WORKER_URL}/jobs" \
+  -H 'content-type: application/json' \
+  -d '{"kind":"aeo_loop","site_id":"<SITE_ID>","payload":{"site_id":"<SITE_ID>"}}'
+```
+
+The response contains a `job_id`. Poll until the job terminates:
+
+```bash
+curl -sS "${CLI_WORKER_URL}/jobs/<JOB_ID>"
+```
+
+Each poll returns the job status (`queued|running|succeeded|failed`) and a streamed list of progress events.
+
+## Step 3 — print the loop result
+
+When the job finishes:
+
+- On `succeeded`: print the `LoopRunnerResult` (PR URL if a PR was opened, the brief IDs, the audit IDs, `next_step`).
+- On `no_qualifying_gaps`: tell the user there are no Tier-1 gaps clearing the evidence floor — suggest re-auditing more pages or relaxing `min_predicted_lift_pp`.
+- On `failed`: surface the error envelope verbatim — do **not** mask `QUOTA_EXCEEDED` or `NETWORK` errors.
 
 ## Stop conditions
 
-- If `evidence_policy.require_tier_1_only` is true and zero Tier-1 gaps remain, exit with a "no qualifying gaps" message.
-- If git is dirty, refuse to start without `--allow-dirty`.
+- cli-worker daemon unreachable — tell the user to start it (`npm run start --workspace=cli-worker`).
+- `read_config` errors — fall back to `/aeo:bootstrap`.
+- Job ends with status `failed` and a non-retryable error code — surface and stop.

@@ -1,0 +1,24 @@
+{
+  "name": "llm-seo-lab",
+  "owner": {
+    "name": "SharathSPhD",
+    "url": "https://github.com/SharathSPhD"
+  },
+  "metadata": {
+    "description": "Closed-loop autonomous AEO/LLM-SEO citation engineering. The llm-seo-lab plugin and its bundled MCP server.",
+    "version": "0.2.0"
+  },
+  "plugins": [
+    {
+      "name": "llm-seo-lab",
+      "source": "./plugin",
+      "version": "0.2.0",
+      "description": "Audit a page, draft the fix as a PR, measure citation-share lift after merge — closed-loop AEO/LLM-SEO powered by the Claude Code subscription CLI.",
+      "homepage": "https://github.com/SharathSPhD/llm-seo-lab",
+      "repository": "https://github.com/SharathSPhD/llm-seo-lab",
+      "license": "MIT",
+      "keywords": ["aeo", "llm-seo", "geo", "citation", "claude-code"],
+      "category": "seo"
+    }
+  ]
+}

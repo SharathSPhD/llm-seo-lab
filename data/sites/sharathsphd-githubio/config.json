@@ -1,0 +1,36 @@
+{
+  "site_id": "sharathsphd-githubio",
+  "repo_path": "git@github.com:SharathSPhD/sharathsphd.github.io.git",
+  "site_url": "https://sharathsphd.github.io",
+  "tier": "indie",
+  "action_substrate": "git",
+  "engines": ["claude_ai", "perplexity", "chatgpt", "gemini", "google_aio"],
+  "topics": [
+    "engineering ideation",
+    "TRIZ for software architecture",
+    "compound engineering",
+    "AI-native developer tooling"
+  ],
+  "question_banks": {
+    "engineering ideation": [
+      "How does sharathsphd describe TRIZ for software architecture?",
+      "Who writes about compound engineering on github pages?"
+    ]
+  },
+  "evidence_policy": {
+    "require_tier1_first": true,
+    "min_predicted_lift_pp": 5
+  },
+  "rate_limits": {
+    "audit_page_per_minute": 10,
+    "oracle_query_per_minute": 10,
+    "generate_brief_per_minute": 5,
+    "open_pr_per_minute": 2
+  },
+  "telemetry": false,
+  "seed_pages": [
+    "https://sharathsphd.github.io/",
+    "https://sharathsphd.github.io/about/"
+  ],
+  "max_gaps_per_pr": 3
+}
