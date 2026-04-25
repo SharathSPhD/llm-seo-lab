@@ -35,7 +35,7 @@ export default function PrQueueWidget({ initial, ws_url }: PrQueueWidgetProps): 
   const [liveEvents, setLiveEvents] = useState<number>(0);
   const [wsState, setWsState] = useState<"connecting" | "open" | "closed">("closed");
 
-  const url = ws_url ?? process.env["NEXT_PUBLIC_LLM_SEO_LAB_WS_URL"] ?? "ws://localhost:7372";
+  const url = ws_url ?? process.env["NEXT_PUBLIC_LLM_SEO_LAB_WS_URL"] ?? "ws://localhost:7302";
 
   useEffect(() => {
     if (!url || typeof WebSocket === "undefined") return;

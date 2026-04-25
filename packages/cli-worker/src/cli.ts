@@ -8,6 +8,27 @@ interface Cli {
   argv: string[];
   stdout?: NodeJS.WritableStream;
   stderr?: NodeJS.WritableStream;
+  /**
+   * If true, `daemon start` returns as soon as the daemon's sockets are
+   * listening (instead of blocking until SIGTERM). The caller is then
+   * responsible for stopping the daemon via SIGTERM/SIGINT — used only by
+   * tests that want to probe startup without owning the process lifetime.
+   */
+  exitAfterStart?: boolean;
+}
+
+async function waitForShutdown(d: { stop: () => Promise<unknown> }): Promise<void> {
+  await new Promise<void>((resolve) => {
+    let stopping = false;
+    const onSignal = (sig: NodeJS.Signals): void => {
+      if (stopping) return;
+      stopping = true;
+      void d.stop().finally(() => resolve());
+      process.stderr.write(`[cli-worker] received ${sig}; draining…\n`);
+    };
+    process.once("SIGTERM", () => onSignal("SIGTERM"));
+    process.once("SIGINT", () => onSignal("SIGINT"));
+  });
 }
 
 export async function main(cli: Cli): Promise<number> {
@@ -21,6 +42,8 @@ export async function main(cli: Cli): Promise<number> {
     const d = createDaemon({ config: cfg });
     await d.start();
     out.write(JSON.stringify({ status: "started", ports: d.ports() }) + "\n");
+    if ((cli as { exitAfterStart?: boolean }).exitAfterStart) return 0;
+    await waitForShutdown(d);
     return 0;
   }
 

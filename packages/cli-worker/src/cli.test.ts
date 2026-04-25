@@ -71,4 +71,5 @@ describe("cli main()", () => {
     assert.equal(code, 1);
     assert.match(errOut.buf, /Usage:/);
   });
+
 });

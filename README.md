@@ -14,11 +14,11 @@ The AEO / GEO / LLM-SEO category in 2026 is dominated by **monitoring dashboards
 
 | Surface | Purpose | Status |
 |---|---|---|
-| **Cursor plugin** + agents | Developer-facing AEO workflows inside Cursor | spec phase |
-| **MCP server** | Reusable AEO tools exposed to any MCP-compatible client | spec phase |
-| **Claude Code skills** | `aeo-audit`, `citation-oracle-loop`, `content-brief-from-gap`, `schema-generator`, `freshness-radar`, `competitive-citation-intel` | spec phase |
-| **Next.js web dashboard** (`apps/web`) | Consumer-facing surface; orchestrates Claude Code CLI worker | spec phase |
-| **CLI worker daemon** (`packages/cli-worker`) | Drives the Claude Code CLI subprocess; queues; rate-limits to subscription quotas; streams to web app | spec phase |
+| **Cursor plugin** (`plugin/`) + `aeo-loop` agent | Developer-facing AEO workflows inside Cursor: `/aeo:bootstrap`, `/aeo:loop`, `/aeo:audit`, `/aeo:track`, `/aeo:fix`, `/aeo:results`, `/aeo:compete` | v0.1.0-alpha |
+| **MCP server** (`mcp/`) | 12 tools (`audit_page`, `track_citations`, `generate_brief`, `emit_schema`, `compare_competitors`, `oracle_query`, …) + 3 widgets, exposed over JSON-RPC to any MCP client | v0.1.0-alpha |
+| **Claude Code skills** (`skills/`) | `aeo-audit`, `citation-oracle-loop`, `content-brief-from-gap`, `schema-generator`, `freshness-radar`, `competitive-citation-intel` | v0.1.0-alpha |
+| **Next.js web dashboard** (`apps/web`) | Consumer-facing surface; orchestrates the Claude Code CLI worker via the MCP HTTP bridge and a WebSocket | v0.1.0-alpha |
+| **CLI worker daemon** (`packages/cli-worker`) | Drives the Claude Code CLI subprocess; queues; rate-limits to subscription quotas; streams events to the web app over WebSocket | v0.1.0-alpha |
 
 ## Repository layout
 
@@ -63,9 +63,65 @@ A research-grade whitepaper is published to [technektar.substack.com](https://te
 
 TRIZ forces the design space wide open by making the engineer state and resolve formal contradictions instead of jumping to compromise. Attractor-flow then steers the multi-agent build trajectory using dynamical-systems signals (Lyapunov exponents, regime classification) so we converge on a stable solution without thrashing. Together they give you both ceiling (radical creativity) and floor (mechanical convergence).
 
-## Run
+## Quickstart
 
-The development workflow is documented in [CLAUDE.md](CLAUDE.md). The `.mcp.json` registers attractor-flow and triz-engine MCP servers for the Claude Code CLI.
+> **Prerequisites:** Node ≥ 20.10, Python ≥ 3.11, the [Claude Code CLI](https://docs.anthropic.com/claude-code/quickstart) on `PATH`, and (recommended) [`uv`](https://docs.astral.sh/uv/) for the Python MCP server.
+
+```bash
+git clone https://github.com/SharathSPhD/llm-seo-lab.git
+cd llm-seo-lab
+./scripts/install.sh
+```
+
+The installer verifies your toolchain, installs npm workspaces, syncs Python dependencies for the MCP server, and prints the next steps. Then:
+
+```bash
+# 1. Start the cli-worker daemon (job queue, WebSocket, /health)
+npm run start --workspace=@llm-seo-lab/cli-worker
+
+# 2. In another shell, start the Next.js dashboard
+npm run dev --workspace=@llm-seo-lab/web
+open http://localhost:3030
+
+# 3. In your target site's repo, open Cursor and run
+#    /aeo:bootstrap   # writes .llm-seo-lab/config.yaml
+#    /aeo:loop        # one full audit → brief → PR cycle
+
+# 4. Verify the daemon is up
+curl -s http://localhost:7303/health | jq .
+```
+
+End-to-end smoke test (boots the daemon on ephemeral ports, hits `/health`, completes a WebSocket handshake, sends `SIGTERM`, asserts a clean exit):
+
+```bash
+npm run smoke
+```
+
+### Default ports
+
+| Service | Default | Override |
+|---|---|---|
+| Next.js dashboard | `3030` | `next dev --port` |
+| cli-worker HTTP `/health` | `7303` | `--http-port` |
+| cli-worker WebSocket | `7302` | `--ws-port` |
+| MCP server (HTTP bridge) | `7301` | `LLM_SEO_LAB_MCP_URL` |
+
+### Useful scripts
+
+```bash
+npm run typecheck   # tsc --noEmit across all workspaces
+npm run test        # node --test in every workspace; pytest in mcp/
+npm run lint        # eslint
+npm run format      # prettier --write
+npm run build       # next build for apps/web; tsc for packages
+npm run smoke       # daemon e2e smoke test
+```
+
+## Development workflow
+
+The agent-driven development workflow is documented in [CLAUDE.md](CLAUDE.md). The repo's `.mcp.json` registers the **attractor-flow** and **triz-engine** MCP servers so the design loop (TRIZ contradiction analysis → attractor-flow convergence) runs inside Cursor.
+
+Phase progress and history are tracked in [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

@@ -6,6 +6,6 @@
   "installCommand": "echo skip",
   "devCommand": "next dev --port 3030",
   "env": {
-    "NEXT_PUBLIC_LLM_SEO_LAB_HEALTH_URL": "http://localhost:7373/health"
+    "NEXT_PUBLIC_LLM_SEO_LAB_HEALTH_URL": "http://localhost:7303/health"
   }
 }

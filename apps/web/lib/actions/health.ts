@@ -25,7 +25,7 @@ export interface HealthDeps {
 }
 
 const DEFAULT_HEALTH_URL =
-  process.env["LLM_SEO_LAB_HEALTH_URL"] ?? "http://localhost:7373/health";
+  process.env["LLM_SEO_LAB_HEALTH_URL"] ?? "http://localhost:7303/health";
 
 export async function getDaemonHealth(deps: HealthDeps = {}): Promise<DaemonHealthDto> {
   const url = deps.url ?? DEFAULT_HEALTH_URL;
