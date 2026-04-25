@@ -1,0 +1,23 @@
+{
+  "name": "@llm-seo-lab/cli-worker",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "description": "Long-running daemon that runs the AEO closed loop, orchestrates the Claude Code CLI subscription, and streams events to the Next.js dashboard via WebSocket.",
+  "main": "./src/daemon.ts",
+  "bin": {
+    "llm-seo-lab": "./bin/llm-seo-lab.mjs"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types --enable-source-maps --test-reporter=spec 'src/**/*.test.ts' 'tests/**/*.test.ts'",
+    "start": "node --experimental-strip-types src/cli.ts daemon start"
+  },
+  "dependencies": {
+    "@llm-seo-lab/shared": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.6.0"
+  }
+}
