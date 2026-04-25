@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "cd ../.. && npm install && npm run build --workspace=@llm-seo-lab/web",
+  "outputDirectory": ".next",
+  "installCommand": "echo skip",
+  "devCommand": "next dev --port 3030",
+  "env": {
+    "NEXT_PUBLIC_LLM_SEO_LAB_HEALTH_URL": "http://localhost:7373/health"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@llm-seo-lab/web",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "description": "Next.js dashboard for llm-seo-lab. Renders site list, audit summary, PR queue, citation trend, and statistical results, talks to the MCP server over HTTP, and live-subscribes to the cli-worker daemon over WebSocket.",
+  "scripts": {
+    "dev": "next dev --port 3030",
+    "build": "next build",
+    "start": "next start --port 3030",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types --enable-source-maps --test-reporter=spec 'lib/**/*.test.ts' 'tests/**/*.test.ts'"
+  },
+  "dependencies": {
+    "@llm-seo-lab/shared": "*",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.6.0"
+  }
+}
