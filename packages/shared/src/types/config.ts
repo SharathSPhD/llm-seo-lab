@@ -25,6 +25,15 @@ export interface SiteConfig {
   };
   rate_limits: RateLimits;
   telemetry: boolean;
+  /**
+   * URLs the loop runner audits each tick. Optional for back-compat; if
+   * empty the runner falls back to `[site_url]`.
+   */
+  seed_pages?: string[];
+  /**
+   * Maximum number of gaps to bundle into a single PR. Defaults to 3.
+   */
+  max_gaps_per_pr?: number;
 }
 
 export const DEFAULT_RATE_LIMITS_BY_TIER: Record<Tier, RateLimits> = {

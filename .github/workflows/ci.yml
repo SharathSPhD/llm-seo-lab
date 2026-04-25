@@ -22,6 +22,11 @@ jobs:
       - run: npm run lint --silent
       - run: npm run typecheck --silent
       - run: npm run test --silent
+      - name: MCP HTTP integration tripwire
+        run: node --experimental-strip-types --test mcp/tests/integration.http.test.ts
+      - name: cli-worker loop schema tripwire
+        run: node --experimental-strip-types --test packages/cli-worker/src/runners/loop.test.ts
+      - run: npm run smoke --silent
 
   python-lint:
     name: Python ruff lint

@@ -17,6 +17,17 @@ export interface ToolContext {
   rateLimit: RateLimiter;
   now: () => Date;
   cwd: string;
+  /**
+   * Root directory the read-side tools (`list_sites`, `read_latest_audit`,
+   * `list_prs`, `read_citation_trend`, `read_config({site_id})`) consult.
+   * Convention:
+   *   {dataDir}/sites/<site_id>/config.json
+   *   {dataDir}/sites/<site_id>/audits/*.json
+   *   {dataDir}/sites/<site_id>/briefs/*.json
+   *   {dataDir}/sites/<site_id>/prs/*.json
+   *   {dataDir}/sites/<site_id>/snapshots/*.json
+   */
+  dataDir: string;
 }
 
 export interface ClaudeWorker {

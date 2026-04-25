@@ -9,8 +9,11 @@ import type {
   PrSummary,
   SiteConfig,
   AeoTactic,
+  SiteAuditSummary,
+  AuditGap,
 } from "@llm-seo-lab/shared";
 import type { ToolDescriptor, ToolContext } from "../types.ts";
+import type { ToolRegistry } from "../registry.ts";
 import { errInternal, errInvalidInput, errNotFound } from "../errors.ts";
 import { readFile, writeFile, readdir, stat } from "node:fs/promises";
 import { join, resolve } from "node:path";
@@ -66,18 +69,40 @@ export const readRepoMetadata: ToolDescriptor<{ repo_path: string }, RepoMetadat
   },
 };
 
-export const readConfig: ToolDescriptor<{ config_path: string }, SiteConfig> = {
+function siteConfigPath(ctx: ToolContext, site_id: string): string {
+  return join(ctx.dataDir, "sites", site_id, "config.json");
+}
+
+export const readConfig: ToolDescriptor<
+  { site_id?: string; config_path?: string },
+  SiteConfig
+> = {
   name: "read_config",
-  description: "Read the SiteConfig JSON for a site.",
-  inputSchema: { type: "object", properties: { config_path: { type: "string" } }, required: ["config_path"] },
+  description: "Read the SiteConfig JSON for a site. Supply either site_id (resolved against dataDir) or config_path.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      site_id: { type: "string" },
+      config_path: { type: "string" },
+    },
+  },
   outputSchema: { type: "object" },
-  async handler(input) {
+  async handler(input, ctx) {
+    const path = input.config_path ?? (input.site_id ? siteConfigPath(ctx, input.site_id) : undefined);
+    if (!path) {
+      return err(errInvalidInput(
+        "read_config requires site_id or config_path",
+        "Pass {site_id} or {config_path}",
+      ));
+    }
     try {
-      const raw = await readFile(input.config_path, "utf8");
+      const raw = await readFile(path, "utf8");
       return ok(JSON.parse(raw) as SiteConfig);
     } catch (e) {
-      return err(errNotFound(`cannot read ${input.config_path}: ${(e as Error).message}`,
-        "Run /aeo:bootstrap to create a config"));
+      return err(errNotFound(
+        `cannot read ${path}: ${(e as Error).message}`,
+        "Run /aeo:bootstrap to create a config",
+      ));
     }
   },
 };
@@ -140,7 +165,7 @@ export const auditPage: ToolDescriptor<
 };
 
 export const generateBrief: ToolDescriptor<
-  { gap: import("@llm-seo-lab/shared").AuditGap; page_url: string; page_html: string; repo_path: string },
+  { gap: AuditGap; page_url: string; page_html: string; repo_path: string },
   ContentBrief
 > = {
   name: "generate_brief",
@@ -510,7 +535,174 @@ export const readResults: ToolDescriptor<{ results_dir: string }, ResultsBundle>
   },
 };
 
-export function registerAllTools(ctx: ToolContext, registry: import("../registry.ts").ToolRegistry): void {
+async function listJsonFilesSorted(dir: string): Promise<string[]> {
+  if (!existsSync(dir)) return [];
+  const ents = await readdir(dir);
+  return ents.filter((e) => e.endsWith(".json")).sort();
+}
+
+async function readJsonFiles<T>(dir: string): Promise<T[]> {
+  const files = await listJsonFilesSorted(dir);
+  const out: T[] = [];
+  for (const f of files) {
+    try {
+      const raw = await readFile(join(dir, f), "utf8");
+      out.push(JSON.parse(raw) as T);
+    } catch {
+      /* skip malformed */
+    }
+  }
+  return out;
+}
+
+export interface ListSitesResult { sites: SiteConfig[] }
+
+export const listSites: ToolDescriptor<Record<string, never>, ListSitesResult> = {
+  name: "list_sites",
+  description: "List every SiteConfig under {dataDir}/sites/<site_id>/config.json.",
+  inputSchema: { type: "object" },
+  outputSchema: { type: "object" },
+  async handler(_input, ctx) {
+    const root = join(ctx.dataDir, "sites");
+    if (!existsSync(root)) return ok({ sites: [] });
+    const entries = await readdir(root);
+    const sites: SiteConfig[] = [];
+    for (const id of entries) {
+      const cfgPath = join(root, id, "config.json");
+      if (!existsSync(cfgPath)) continue;
+      try {
+        const raw = await readFile(cfgPath, "utf8");
+        sites.push(JSON.parse(raw) as SiteConfig);
+      } catch {
+        /* skip malformed */
+      }
+    }
+    return ok({ sites });
+  },
+};
+
+export interface SiteAuditView extends SiteAuditSummary {
+  recent_gaps: AuditGap[];
+}
+
+export const readLatestAudit: ToolDescriptor<{ site_id: string }, SiteAuditView> = {
+  name: "read_latest_audit",
+  description: "Read the most recent audit for a site and surface a SiteAuditSummary + recent gaps.",
+  inputSchema: {
+    type: "object",
+    properties: { site_id: { type: "string" } },
+    required: ["site_id"],
+  },
+  outputSchema: { type: "object" },
+  async handler(input, ctx) {
+    const dir = join(ctx.dataDir, "sites", input.site_id, "audits");
+    const audits = await readJsonFiles<PageAuditResult>(dir);
+    if (audits.length === 0) {
+      return err(errNotFound(
+        `no audits for site ${input.site_id}`,
+        "Run /aeo:audit to produce one",
+      ));
+    }
+    audits.sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
+    const latest = audits[0]!;
+    const sameRun = audits.filter((a) => a.audit_id.split("/")[0] === latest.audit_id.split("/")[0]);
+    const allGaps = sameRun.flatMap((a) => a.gaps);
+    const tacticCounts = new Map<string, { count: number; lift: number }>();
+    for (const g of allGaps) {
+      const e = tacticCounts.get(g.tactic) ?? { count: 0, lift: 0 };
+      e.count += 1;
+      e.lift += g.predicted_lift_pp;
+      tacticCounts.set(g.tactic, e);
+    }
+    const top_tactics = [...tacticCounts.entries()]
+      .map(([tactic, v]) => ({ tactic: tactic as AeoTactic, count: v.count, aggregate_lift_pp: v.lift }))
+      .sort((a, b) => b.aggregate_lift_pp - a.aggregate_lift_pp)
+      .slice(0, 5);
+    const aggregate_lift = allGaps.reduce((s, g) => s + g.predicted_lift_pp, 0);
+    const recent_gaps = [...allGaps]
+      .sort((a, b) => b.predicted_lift_pp - a.predicted_lift_pp)
+      .slice(0, 10);
+    return ok({
+      audit_run_id: latest.audit_id,
+      timestamp: latest.timestamp,
+      pages_audited: sameRun.length,
+      total_gaps: allGaps.length,
+      top_tactics,
+      predicted_aggregate_lift_pp: aggregate_lift,
+      recent_gaps,
+    });
+  },
+};
+
+export const listPrs: ToolDescriptor<{ site_id: string }, { prs: PrSummary[] }> = {
+  name: "list_prs",
+  description: "List all PRs recorded for a site (open + merged + closed).",
+  inputSchema: {
+    type: "object",
+    properties: { site_id: { type: "string" } },
+    required: ["site_id"],
+  },
+  outputSchema: { type: "object" },
+  async handler(input, ctx) {
+    const dir = join(ctx.dataDir, "sites", input.site_id, "prs");
+    const prs = await readJsonFiles<PrSummary>(dir);
+    prs.sort((a, b) => (a.opened_at < b.opened_at ? 1 : -1));
+    return ok({ prs });
+  },
+};
+
+export interface CitationTrendPoint {
+  date: string;
+  per_engine: Partial<Record<Engine, number>>;
+}
+export interface CitationTrendView {
+  topic: string;
+  points: CitationTrendPoint[];
+  latest: CitationShareSnapshot;
+}
+
+export const readCitationTrend: ToolDescriptor<
+  { site_id: string; topic: string },
+  CitationTrendView
+> = {
+  name: "read_citation_trend",
+  description: "Build a per-engine citation share trend for one topic over all snapshots on file.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      site_id: { type: "string" },
+      topic: { type: "string" },
+    },
+    required: ["site_id", "topic"],
+  },
+  outputSchema: { type: "object" },
+  async handler(input, ctx) {
+    const dir = join(ctx.dataDir, "sites", input.site_id, "snapshots");
+    const all = await readJsonFiles<CitationShareSnapshot>(dir);
+    const matching = all.filter((s) => s.topic === input.topic);
+    if (matching.length === 0) {
+      return err(errNotFound(
+        `no snapshots for site ${input.site_id} topic '${input.topic}'`,
+        "Run /aeo:track to capture one",
+      ));
+    }
+    matching.sort((a, b) => (a.window_end < b.window_end ? -1 : 1));
+    const points: CitationTrendPoint[] = matching.map((snap) => {
+      const per: Partial<Record<Engine, number>> = {};
+      for (const [e, v] of Object.entries(snap.per_engine)) {
+        if (v) per[e as Engine] = v.share;
+      }
+      return { date: snap.window_end, per_engine: per };
+    });
+    return ok({
+      topic: input.topic,
+      points,
+      latest: matching[matching.length - 1]!,
+    });
+  },
+};
+
+export function registerAllTools(ctx: ToolContext, registry: ToolRegistry): void {
   void ctx;
   registry.register(readRepoMetadata);
   registry.register(readConfig);
@@ -524,6 +716,10 @@ export function registerAllTools(ctx: ToolContext, registry: import("../registry
   registry.register(compareCompetitors);
   registry.register(readPrStatus);
   registry.register(readResults);
+  registry.register(listSites);
+  registry.register(readLatestAudit);
+  registry.register(listPrs);
+  registry.register(readCitationTrend);
 }
 
 export function expectedTactics(): AeoTactic[] {

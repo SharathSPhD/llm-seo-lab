@@ -10,20 +10,24 @@ function fakeFetch(
 }
 
 describe("McpHttpClient", () => {
-  it("round-trips a JSON-RPC tools/call envelope and returns result", async () => {
+  it("round-trips a JSON-RPC tools/call envelope and unwraps {ok,value}", async () => {
     let lastBody: unknown;
     const client = new McpHttpClient({
       endpoint: "http://x/mcp",
       fetchImpl: fakeFetch((_url, init) => {
         lastBody = JSON.parse(String(init.body));
         return new Response(
-          JSON.stringify({ jsonrpc: "2.0", id: 1, result: { ok: true, hello: "world" } }),
+          JSON.stringify({
+            jsonrpc: "2.0",
+            id: 1,
+            result: { ok: true, value: { hello: "world" } },
+          }),
           { status: 200, headers: { "content-type": "application/json" } },
         );
       }),
     });
-    const out = await client.call<{ ok: boolean; hello: string }>("ping", { x: 1 });
-    assert.deepEqual(out, { ok: true, hello: "world" });
+    const out = await client.call<{ hello: string }>("ping", { x: 1 });
+    assert.deepEqual(out, { hello: "world" });
     const body = lastBody as { jsonrpc: string; method: string; params: { name: string; arguments: unknown } };
     assert.equal(body.jsonrpc, "2.0");
     assert.equal(body.method, "tools/call");
@@ -31,7 +35,22 @@ describe("McpHttpClient", () => {
     assert.deepEqual(body.params.arguments, { x: 1 });
   });
 
-  it("throws McpHttpError when the server returns an MCP-level error envelope", async () => {
+  it("returns raw result when server skips the envelope (legacy/non-tool methods)", async () => {
+    const client = new McpHttpClient({
+      endpoint: "http://x/mcp",
+      fetchImpl: fakeFetch(
+        () =>
+          new Response(JSON.stringify({ jsonrpc: "2.0", id: 1, result: { tools: [] } }), {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          }),
+      ),
+    });
+    const out = await client.call<{ tools: unknown[] }>("tools/list", {});
+    assert.deepEqual(out, { tools: [] });
+  });
+
+  it("throws McpHttpError when JSON-RPC level error is returned", async () => {
     const client = new McpHttpClient({
       endpoint: "http://x/mcp",
       fetchImpl: fakeFetch(
@@ -45,6 +64,36 @@ describe("McpHttpClient", () => {
     await assert.rejects(
       () => client.call("audit_page", { site_id: "s1" }),
       (err: unknown) => err instanceof McpHttpError && (err as McpHttpError).code === -32001,
+    );
+  });
+
+  it("throws McpHttpError with tool-level error code when envelope is {ok:false,error}", async () => {
+    const client = new McpHttpClient({
+      endpoint: "http://x/mcp",
+      fetchImpl: fakeFetch(
+        () =>
+          new Response(
+            JSON.stringify({
+              jsonrpc: "2.0",
+              id: 1,
+              result: {
+                ok: false,
+                error: {
+                  code: "QUOTA_EXCEEDED",
+                  message: "rate limited",
+                  actionable_next_step: "wait 60s",
+                  retry_after_seconds: 60,
+                },
+              },
+            }),
+            { status: 200, headers: { "content-type": "application/json" } },
+          ),
+      ),
+    });
+    await assert.rejects(
+      () => client.call("audit_page", {}),
+      (err: unknown) =>
+        err instanceof McpHttpError && /audit_page: rate limited/.test((err as Error).message),
     );
   });
 

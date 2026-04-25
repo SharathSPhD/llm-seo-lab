@@ -3,9 +3,9 @@ import assert from "node:assert/strict";
 import { startServer } from "../src/server.ts";
 import { dispatch } from "../src/transports/jsonrpc.ts";
 
-test("server registers all 12 tools", async () => {
+test("server registers all 16 tools (12 core + 4 read-side)", async () => {
   const s = await startServer({ enableStdio: false });
-  assert.equal(s.registry.size(), 12);
+  assert.equal(s.registry.size(), 16);
 });
 
 test("ping over jsonrpc returns pong", async () => {
@@ -22,7 +22,11 @@ test("tools/list returns the registered tools", async () => {
   assert.ok(names.includes("audit_page"));
   assert.ok(names.includes("oracle_query"));
   assert.ok(names.includes("compare_competitors"));
-  assert.equal(names.length, 12);
+  assert.ok(names.includes("list_sites"));
+  assert.ok(names.includes("read_latest_audit"));
+  assert.ok(names.includes("list_prs"));
+  assert.ok(names.includes("read_citation_trend"));
+  assert.equal(names.length, 16);
 });
 
 test("unknown tool returns -32601", async () => {

@@ -37,6 +37,7 @@ function makeCtx(overrides: Partial<ToolContext> = {}): ToolContext {
     rateLimit: { async take() { return ok(undefined); } },
     now: () => new Date("2026-04-25T12:00:00Z"),
     cwd: process.cwd(),
+    dataDir: `${process.cwd()}/data`,
     ...overrides,
   };
 }
