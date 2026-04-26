@@ -1,14 +1,14 @@
 {
   "$schema": "https://cursor.sh/plugins/schema.json",
   "name": "llm-seo-lab",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "displayName": "LLM SEO Lab",
-  "description": "Closed-loop autonomous AEO/LLM-SEO citation engineering. Audits your site, drafts the fix as a PR, measures the lift after merge.",
+  "description": "Citation-pull engineering for AI search. Multi-stage, human-gated workflow that emits substrate-correct artifacts (web PR diffs, Substack paste-ready Markdown, YouTube Studio checklists). Includes the v0.2.0 closed-loop /aeo:* commands.",
   "author": "SharathSPhD",
   "repository": "https://github.com/SharathSPhD/llm-seo-lab",
   "license": "MIT",
   "categories": ["seo", "content", "automation"],
-  "keywords": ["aeo", "llm-seo", "geo", "citation", "claude-code"],
+  "keywords": ["aeo", "llm-seo", "geo", "citation-pull", "claude-code", "substack", "youtube", "triz", "supabase"],
   "components": {
     "commands": "./commands",
     "agents": "./agents",

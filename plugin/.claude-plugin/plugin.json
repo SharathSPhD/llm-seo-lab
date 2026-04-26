@@ -1,7 +1,7 @@
 {
   "name": "llm-seo-lab",
-  "version": "0.2.0",
-  "description": "Closed-loop autonomous AEO/LLM-SEO citation engineering. Audits your site, drafts the fix as a PR, measures the lift after merge. Powered by the Claude Code subscription CLI — no API keys.",
+  "version": "0.3.0",
+  "description": "Citation-pull engineering for AI search. Runs TRIZ + attractor-flow + Pratyaksha against any web page, Substack post, or YouTube video and emits substrate-correct artifacts (PR diffs, paste-ready Markdown, YT Studio checklists). Multi-stage, human-gated; the v0.2.0 closed-loop /aeo:* commands are kept alongside. Powered by the Claude Code subscription CLI.",
   "author": {
     "name": "SharathSPhD",
     "url": "https://github.com/SharathSPhD"
@@ -9,5 +9,5 @@
   "homepage": "https://github.com/SharathSPhD/llm-seo-lab",
   "repository": "https://github.com/SharathSPhD/llm-seo-lab",
   "license": "MIT",
-  "keywords": ["aeo", "llm-seo", "geo", "citation", "claude-code", "rag", "search"]
+  "keywords": ["aeo", "llm-seo", "geo", "citation-pull", "claude-code", "rag", "substack", "youtube", "triz", "supabase"]
 }

@@ -1,6 +1,6 @@
 {
   "name": "@llm-seo-lab/plugin",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "Cursor plugin manifest, commands, agents, and hooks for llm-seo-lab.",

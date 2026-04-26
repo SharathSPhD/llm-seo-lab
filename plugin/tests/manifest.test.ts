@@ -72,7 +72,7 @@ describe("plugin.json manifest", () => {
 
 describe("commands", () => {
   const commandsDir = join(pluginRoot, "commands");
-  const expected = [
+  const aeoCommands = [
     "aeo-bootstrap.md",
     "aeo-audit.md",
     "aeo-fix.md",
@@ -81,18 +81,35 @@ describe("commands", () => {
     "aeo-compete.md",
     "aeo-status.md",
   ];
+  const pullCommands = [
+    "pull-recommend.md",
+    "pull-apply.md",
+    "pull-measure.md",
+    "pull-analyze.md",
+    "pull-state.md",
+  ];
+  const expected = [...aeoCommands, ...pullCommands];
 
-  it("contains exactly the 7 expected command files", () => {
+  it("contains exactly the 12 expected command files (7 v0.2.0 aeo + 5 v0.3.0 pull)", () => {
     const found = readdirSync(commandsDir).filter((f) => f.endsWith(".md")).sort();
     assert.deepEqual(found, [...expected].sort());
   });
 
-  for (const file of expected) {
-    it(`${file} has name + description frontmatter`, () => {
+  for (const file of aeoCommands) {
+    it(`${file} has aeo:* name + description frontmatter`, () => {
       const fm = readMatter(join(commandsDir, file));
       assert.ok(fm["name"], `${file} missing name`);
       assert.ok(fm["description"], `${file} missing description`);
       assert.match(fm["name"]!, /^aeo:[a-z-]+$/);
+    });
+  }
+
+  for (const file of pullCommands) {
+    it(`${file} has pull:* name + description frontmatter`, () => {
+      const fm = readMatter(join(commandsDir, file));
+      assert.ok(fm["name"], `${file} missing name`);
+      assert.ok(fm["description"], `${file} missing description`);
+      assert.match(fm["name"]!, /^pull:[a-z-]+$/);
     });
   }
 });
@@ -104,6 +121,24 @@ describe("agents", () => {
     const fm = readMatter(join(agentsDir, "aeo-loop.md"));
     assert.equal(fm["name"], "aeo-loop");
     assert.ok(fm["description"]);
+  });
+
+  it("contains pull-orchestrator.md (v0.3.0)", () => {
+    const fm = readMatter(join(agentsDir, "pull-orchestrator.md"));
+    assert.equal(fm["name"], "pull-orchestrator");
+    assert.ok(fm["description"]);
+  });
+});
+
+describe("manifest version", () => {
+  it("plugin .cursor-plugin/plugin.json is at v0.3.0", () => {
+    const m = readJson(join(pluginRoot, ".cursor-plugin", "plugin.json")) as { version: string };
+    assert.equal(m.version, "0.3.0");
+  });
+
+  it("plugin .claude-plugin/plugin.json is at v0.3.0", () => {
+    const m = readJson(join(pluginRoot, ".claude-plugin", "plugin.json")) as { version: string };
+    assert.equal(m.version, "0.3.0");
   });
 });
 
