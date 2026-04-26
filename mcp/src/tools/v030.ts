@@ -26,7 +26,9 @@
  *     the test suite can run without a live Supabase project.
  */
 
-import { ok, err } from "@llm-seo-lab/shared";
+import { ok, err, CHARTER_PRINCIPLE_LIST } from "@llm-seo-lab/shared";
+import type { CharterPrinciple, AdapterUseCase } from "@llm-seo-lab/shared";
+import { getAdapter } from "@llm-seo-lab/plugin/adapters";
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
@@ -365,64 +367,26 @@ export const recordUseCaseEvent: ToolDescriptor<
 
 /**
  * Charter principles ratified in docs/decisions/2026-04-26-citation-pull-charter.md.
- * The recommender always returns a Recommendation per principle that
- * applies to the use case's substrate. Substrate-specific knobs and
- * payloads come from the v0.3.0 substrate adapters in R4; until those
- * land, the recommender uses a deterministic stub keyed on the
- * principle + substrate so the loop can still produce reviewable rows.
+ *
+ * v0.3.0 R4: per-substrate knobs/engines/rationales now live in the
+ * substrate adapters at `plugin/scripts/adapters/{web,substack,youtube}.ts`.
+ * `pull_recommend` calls `adapter.recommend(uc, principle)` for each
+ * principle in `CHARTER_PRINCIPLE_LIST` and persists the resulting
+ * draft. The MCP layer is therefore the orchestrator (Claude prompt,
+ * Supabase persistence, rate-limit, ownership check); the adapters own
+ * the substrate-specific shape.
  */
-const CHARTER_PRINCIPLES: { principle: string; knob: Record<Substrate, string>; engines: string[]; rationale: string }[] = [
-  {
-    principle: "atomic-snippet-density",
-    knob: {
-      web: "json_ld_faqpage",
-      substack: "lede_rewrite",
-      youtube: "pinned_comment",
-    },
-    engines: ["chatgpt", "perplexity", "google_aio"],
-    rationale: "Atomic Q→A snippets give retrievers a citation-shaped target with explicit source attribution.",
-  },
-  {
-    principle: "semantic-anchor-stability",
-    knob: {
-      web: "h2_h3_canonical_anchors",
-      substack: "subhead_restructure",
-      youtube: "chapters",
-    },
-    engines: ["chatgpt", "perplexity"],
-    rationale: "Stable heading/anchor wording across iterations lets engines re-cite without re-resolving.",
-  },
-  {
-    principle: "q-shaped-subhead-lattice",
-    knob: {
-      web: "h2_subhead_questions",
-      substack: "subhead_restructure",
-      youtube: "title_rewrite",
-    },
-    engines: ["chatgpt", "google_aio", "claude_ai"],
-    rationale: "Subheads phrased as the user's question increase semantic match against engine-side prompts.",
-  },
-  {
-    principle: "cross-engine-intermediary",
-    knob: {
-      web: "outbound_authority_link_block",
-      substack: "link_block_addition",
-      youtube: "description_structure",
-    },
-    engines: ["perplexity", "chatgpt", "gemini"],
-    rationale: "An intermediary high-authority link block gives engines a citation chain they will reuse.",
-  },
-  {
-    principle: "inverted-retrieval-target",
-    knob: {
-      web: "answer_first_lede",
-      substack: "lede_rewrite",
-      youtube: "description_structure",
-    },
-    engines: ["chatgpt", "perplexity", "google_aio"],
-    rationale: "Putting the citable answer in the first 200 chars inverts the page so retrievers grab it first.",
-  },
-];
+function toAdapterUseCase(uc: UseCaseRow, iteration: number): AdapterUseCase {
+  return {
+    id: uc.id,
+    url: uc.url,
+    substrate: uc.substrate,
+    title: uc.title,
+    topic: uc.topic,
+    target_audience: uc.target_audience,
+    iteration,
+  };
+}
 
 export const pullRecommend: ToolDescriptor<
   { use_case_id: string; user_id: string; iteration?: number },
@@ -465,21 +429,24 @@ export const pullRecommend: ToolDescriptor<
       }
     }
 
+    const adapter = getAdapter(uc.substrate);
+    const adapterUc = toAdapterUseCase(uc, iteration);
+
     const rows: RecommendationRow[] = [];
-    for (const p of CHARTER_PRINCIPLES) {
-      const fromClaude = trizPayloadFromClaude?.find((c) => c.triz_principle === p.principle);
-      const knob = p.knob[uc.substrate];
+    for (const principle of CHARTER_PRINCIPLE_LIST) {
+      const draft = adapter.recommend(adapterUc, principle as CharterPrinciple);
+      const fromClaude = trizPayloadFromClaude?.find((c) => c.triz_principle === principle);
       const insertRow: Omit<RecommendationRow, "id" | "created_at"> = {
         use_case_id: uc.id,
         user_id: uc.user_id,
         iteration,
-        triz_principle: p.principle,
-        applicability_score: fromClaude?.applicability_score ?? 0.7,
-        knob,
-        diff_summary: `Apply ${p.principle} via ${knob} for ${uc.substrate} substrate`,
-        payload: fromClaude?.payload ?? { stub: true, principle: p.principle, knob, substrate: uc.substrate },
-        rationale: fromClaude?.rationale ?? p.rationale,
-        expected_engines: p.engines,
+        triz_principle: principle,
+        applicability_score: fromClaude?.applicability_score ?? draft.applicability_score,
+        knob: draft.knob,
+        diff_summary: draft.diff_summary,
+        payload: fromClaude?.payload ?? draft.payload,
+        rationale: fromClaude?.rationale ?? draft.rationale,
+        expected_engines: draft.expected_engines,
         claude_run_id: claudeRunId,
       };
       const inserted = await insertReturning<RecommendationRow>(sb, "recommendations", insertRow);
@@ -523,56 +490,16 @@ export const pullApplyArtifact: ToolDescriptor<
   },
 };
 
+/**
+ * Build the apply artifact for one recommendation. Delegates to the
+ * substrate adapter — the per-substrate output shape (unified diff /
+ * paste-ready markdown / YouTube-Studio checklist) is the adapter's
+ * concern, not the MCP layer's.
+ */
 export function buildArtifact(rec: RecommendationRow, uc: UseCaseRow): ArtifactPayload {
-  switch (uc.substrate) {
-    case "web": {
-      const diff = `--- a/page.html\n+++ b/page.html\n@@\n-<!-- v0.3.0 ${rec.triz_principle} placeholder -->\n+<!-- patched: ${rec.knob} (${rec.triz_principle}) -->\n`;
-      return {
-        recommendation_id: rec.id,
-        artifact_kind: "pr_diff",
-        primary: diff,
-        ancillary: { knob: rec.knob },
-        human_steps: [
-          "Review the diff in your repo.",
-          "Apply the patch (gh pr checkout / git apply).",
-          "Push the branch and open a PR; click 'Mark applied' in the dashboard.",
-        ],
-      };
-    }
-    case "substack": {
-      const md = `> **Q-shaped lede:** _${uc.topic}_\n\n${rec.rationale}\n\n_Edit suggested by llm-seo-lab — knob: ${rec.knob}_`;
-      return {
-        recommendation_id: rec.id,
-        artifact_kind: "paste_markdown",
-        primary: md,
-        ancillary: { knob: rec.knob },
-        human_steps: [
-          "Open the Substack post in the editor.",
-          `Paste the markdown into the ${rec.knob} location.`,
-          "Republish the post and click 'Mark applied' in the dashboard.",
-        ],
-      };
-    }
-    case "youtube": {
-      const checklist = [
-        `Title: rewrite to a Q-shape that includes the central question (${uc.topic}).`,
-        `Description: put the citable answer in the first 200 chars (${rec.knob}).`,
-        `Pinned comment: paste the structured answer with citations.`,
-        `Chapters: re-label each chapter as a Q-shape.`,
-      ].join("\n");
-      return {
-        recommendation_id: rec.id,
-        artifact_kind: "youtube_checklist",
-        primary: checklist,
-        ancillary: { knob: rec.knob },
-        human_steps: [
-          "Open YouTube Studio for the video.",
-          "Apply each line of the checklist to the matching field.",
-          "Click Save in Studio, then 'Mark applied' in the dashboard.",
-        ],
-      };
-    }
-  }
+  const adapter = getAdapter(uc.substrate);
+  const adapterUc = toAdapterUseCase(uc, rec.iteration);
+  return adapter.applyArtifact(rec, adapterUc);
 }
 
 // ---------------------------------------------------------------------------
@@ -612,7 +539,7 @@ export const pullAnalyze: ToolDescriptor<
     const previous = measurements.filter((m) => m.iteration === iteration - 1);
 
     let verdict: AnalysisRow["verdict"] = "stub";
-    let trizPrinciplesCited: string[] = CHARTER_PRINCIPLES.map((p) => p.principle);
+    let trizPrinciplesCited: string[] = [...CHARTER_PRINCIPLE_LIST];
     let claudeRunId: string | null = null;
     let suggestion: string | null = null;
     let perEngineDelta: Record<string, unknown> | null = null;

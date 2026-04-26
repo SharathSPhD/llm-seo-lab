@@ -7,5 +7,5 @@
       "@llm-seo-lab/shared": ["../packages/shared/src/index.ts"]
     }
   },
-  "include": ["tests/**/*", "../packages/shared/src/**/*"]
+  "include": ["scripts/**/*.ts", "tests/**/*", "../packages/shared/src/**/*"]
 }

@@ -4,4 +4,5 @@ export * from "./types/citation.ts";
 export * from "./types/pr.ts";
 export * from "./types/config.ts";
 export * from "./types/error.ts";
+export * from "./types/v030.ts";
 export * from "./geo-policy.ts";

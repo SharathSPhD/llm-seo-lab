@@ -4,6 +4,12 @@
   "private": true,
   "type": "module",
   "description": "Cursor plugin manifest, commands, agents, and hooks for llm-seo-lab.",
+  "exports": {
+    "./adapters": "./scripts/adapters/index.ts",
+    "./adapters/web": "./scripts/adapters/web.ts",
+    "./adapters/substack": "./scripts/adapters/substack.ts",
+    "./adapters/youtube": "./scripts/adapters/youtube.ts"
+  },
   "scripts": {
     "test": "node --test --experimental-strip-types --enable-source-maps --test-reporter=spec 'tests/**/*.test.ts'",
     "typecheck": "tsc --noEmit"
