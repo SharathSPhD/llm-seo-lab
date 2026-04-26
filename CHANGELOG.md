@@ -6,7 +6,82 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
-(Nothing yet — `v0.3.0` cut on 2026-04-26.)
+(Nothing yet — `v0.4.0` sweep is in flight; see the `[0.4.0]` stub below.)
+
+## [0.4.0] — In flight (2026-04-26 → 2026-04-27) — "Skip Vercel/Supabase, move to Cloudflare D1 + GitHub OAuth"
+
+This release replaces the v0.3.0 dashboard backend (Supabase + Vercel) with
+**Cloudflare Pages + D1 (SQLite) + GitHub OAuth**, while preserving the
+v0.3.0 product surface bit-for-bit (8 stages, 5 MCP tools, 3 substrate
+adapters, 5 plugin commands, measurement form). It honours the project's
+"no per-token API, no paid managed backends, JSONL-canonical state"
+constraint by making `data/use-cases/<id>/state.jsonl` the canonical
+source of truth, with SQLite as the local cache and D1 as the optional
+hosted mirror. Local Claude Code CLI continues to drive the inventive
+layer; a new `pending_actions` queue lets the hosted dashboard enqueue
+intents that the local plugin's new `/pull:sync` command picks up.
+
+### Planned in v0.4.0 (R8.1 - R8.7 ralph sweep)
+
+- **`packages/state/` workspace** (R8.2) — `StateDriver` interface plus
+  `JsonlSqliteDriver` (local) and `D1HttpDriver` (hosted), with full
+  driver tests; `infra/d1/migrations/0001_init.sql` for the SQLite
+  schema; `scripts/import-jsonl.mjs`, `scripts/export-jsonl.mjs`,
+  `scripts/sync-d1.mjs`, `scripts/import-d1.mjs` for JSONL ↔ SQLite ↔
+  D1 sync.
+- **Supabase removed** (R8.3) — `apps/web/lib/supabase/`,
+  `apps/web/app/auth/callback/route.ts`, `apps/web/app/login/{page,actions}.tsx`
+  (Supabase magic-link flavor), `infra/supabase/`, and the `@supabase/*`
+  dependencies are deleted. `mcp/src/tools/v030.ts` and
+  `apps/web/lib/actions/use-cases.ts` are refactored to call
+  `StateDriver` instead of Supabase.
+- **GitHub OAuth + JWT session** (R8.4) — new
+  `apps/web/app/auth/github/{authorize,callback}/route.ts` and
+  `apps/web/app/auth/logout/route.ts`; new
+  `apps/web/lib/auth/github.ts` (HS256 JWT via `jose`); rewritten
+  `apps/web/lib/auth.ts` and `/login` page; `LLM_SEO_LAB_AUTH=local`
+  shim preserved bit-for-bit.
+- **Cloudflare Pages adapter** (R8.5) — `@cloudflare/next-on-pages`
+  added; `wrangler.toml` at the repo root with the `LLM_SEO_LAB_DB`
+  D1 binding; `cf:build` script; `apps/web/functions/api/sync.ts`
+  Pages Function for local-to-D1 push (auth: signed JWT).
+- **Pending-actions intent queue** (R8.6) — new `pending_actions`
+  table, hosted-dashboard buttons enqueue intents instead of calling
+  MCP, new plugin command `/pull:sync` (read-only on D1 except for
+  `mark_action_executed`), and two new MCP tools
+  `read_pending_actions` and `mark_action_executed`. Plugin manifests
+  bumped to `0.4.0`.
+- **End-to-end verification** (R8.7) — all v0.2.0 + v0.3.0 + new
+  v0.4.0 tests pass; live OAuth + Pages Functions preview verified;
+  README quickstart works on a clean clone; `project-overview.html`
+  v0.4.0 nav group + sections added; final `docs/ralph-runs/v0.4.0/R8.md`
+  ratifies the sweep as GREEN.
+
+### Breaking changes (versus v0.3.0)
+
+- Auth substrate is **GitHub OAuth**, not Supabase magic-link. Users
+  without GitHub accounts must use `LLM_SEO_LAB_AUTH=local`.
+- All `SUPABASE_*` env vars are removed. New env vars:
+  `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET`,
+  `SESSION_JWT_SECRET`, `LLM_SEO_LAB_BASE_URL`, plus the
+  `LLM_SEO_LAB_DB` D1 binding in `wrangler.toml`.
+- The Postgres `assert_user_owns_use_case` trigger no longer exists;
+  ownership is enforced in the `StateDriver` layer.
+- The hosted dashboard cannot trigger Claude CLI directly; it enqueues
+  `pending_actions` rows that the local plugin's `/pull:sync` command
+  picks up.
+- Anyone needing the v0.3.0 Supabase reference implementation should
+  `git checkout v0.3.0`. The v0.3.0 git tag is preserved.
+
+### Frozen (untouched by v0.4.0)
+
+- All v0.3.0 documentation under `docs/v0.3.0/` and ralph reports
+  `docs/ralph-runs/v0.3.0/R1.md..R7.md`.
+- All v0.2.0 ralph reports under `docs/ralph-runs/R1.md..R7.md`.
+- v0.2.0 use-case reports under `docs/use-cases/P1..P5*.md` and
+  `docs/use-cases/P3-live-run-2026-04-25/`.
+- The v0.2.0 / v0.3.0 sections of `project-overview.html`. v0.4.0
+  lands as an additive companion section.
 
 ## [0.3.0] — 2026-04-26 — "Citation-pull reorientation"
 
