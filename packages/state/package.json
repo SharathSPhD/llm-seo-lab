@@ -1,0 +1,34 @@
+{
+  "name": "@llm-seo-lab/state",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./drivers/jsonl-sqlite": "./src/drivers/jsonl-sqlite.ts",
+    "./drivers/d1-http": "./src/drivers/d1-http.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types --enable-source-maps --test-reporter=spec 'src/**/*.test.ts'"
+  },
+  "dependencies": {
+    "@llm-seo-lab/shared": "*"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.10",
+    "@types/node": "^20.0.0",
+    "better-sqlite3": "^11.3.0",
+    "typescript": "^5.6.0"
+  },
+  "peerDependencies": {
+    "better-sqlite3": "^11.3.0"
+  },
+  "peerDependenciesMeta": {
+    "better-sqlite3": {
+      "optional": true
+    }
+  }
+}
