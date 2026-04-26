@@ -78,7 +78,7 @@ async function bootServerWithSeed(): Promise<{ port: number; dataDir: string; st
   return { port: s.http!.port, dataDir, stop: () => s.http!.stop() };
 }
 
-test("HTTP: tools/list returns all 16 tool names", async () => {
+test("HTTP: tools/list returns all 21 tool names (16 v0.2.0 + 5 v0.3.0)", async () => {
   const ctx = await bootServerWithSeed();
   try {
     const res = await fetch(`http://127.0.0.1:${ctx.port}/rpc`, {
@@ -89,15 +89,20 @@ test("HTTP: tools/list returns all 16 tool names", async () => {
     const j = (await res.json()) as { result: { tools: { name: string }[] } };
     const names = new Set(j.result.tools.map((t) => t.name));
     for (const required of [
+      // v0.2.0 surface (16 tools, kept registered; track_citations and
+      // read_citation_trend now return the v0.3.0 deprecation envelope).
       "read_repo_metadata", "read_config", "write_config",
       "audit_page", "generate_brief", "emit_schema",
       "open_pr", "oracle_query", "track_citations",
       "compare_competitors", "read_pr_status", "read_results",
       "list_sites", "read_latest_audit", "list_prs", "read_citation_trend",
+      // v0.3.0 citation-pull tools (spec §5.1).
+      "read_use_case_state", "record_use_case_event",
+      "pull_recommend", "pull_apply_artifact", "pull_analyze",
     ]) {
       assert.ok(names.has(required), `missing tool: ${required}`);
     }
-    assert.equal(names.size, 16);
+    assert.equal(names.size, 21);
   } finally {
     await ctx.stop();
   }
@@ -125,9 +130,10 @@ test("HTTP: read-side tools roundtrip the {ok,value} envelope", async () => {
     assert.equal(prs.ok, true);
     assert.equal(prs.value!.prs.length, 0);
 
+    // v0.3.0: read_citation_trend is deprecated and returns the deprecation envelope on every call.
     const trend = await callTool(ctx.port, "read_citation_trend", { site_id: "integration", topic: "missing" });
     assert.equal(trend.ok, false);
-    assert.equal(trend.error!.code, "NOT_FOUND");
+    assert.match(trend.error!.message, /deprecated_v0_3_0|Measurement leaves the plugin/);
   } finally {
     await ctx.stop();
   }
@@ -149,10 +155,10 @@ test("HTTP: emit_schema produces valid Article JSON-LD", async () => {
   }
 });
 
-test("HTTP: track_citations + compare_competitors aggregate correctly", async () => {
+test("HTTP: track_citations returns v0.3.0 deprecation envelope; compare_competitors still works", async () => {
   const ctx = await bootServerWithSeed();
   try {
-    const tc = await callTool<{ per_engine: Record<string, { share: number }> }>(ctx.port, "track_citations", {
+    const tc = await callTool(ctx.port, "track_citations", {
       samples: [
         { engine: "perplexity", question: "q1", cited: true, sampled_at: "t", sampling_path: "claude_cli" },
         { engine: "perplexity", question: "q2", cited: false, sampled_at: "t", sampling_path: "claude_cli" },
@@ -161,8 +167,8 @@ test("HTTP: track_citations + compare_competitors aggregate correctly", async ()
       window_start: "a",
       window_end: "b",
     });
-    assert.equal(tc.ok, true);
-    assert.equal(tc.value!.per_engine["perplexity"]!.share, 0.5);
+    assert.equal(tc.ok, false);
+    assert.match(tc.error!.message, /deprecated_v0_3_0|Measurement leaves the plugin/);
 
     const cc = await callTool<{ user_share_per_engine: Record<string, number>; gap_themes: { theme: string }[] }>(
       ctx.port, "compare_competitors", {

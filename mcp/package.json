@@ -13,7 +13,8 @@
     "start": "node --experimental-strip-types src/server.ts"
   },
   "dependencies": {
-    "@llm-seo-lab/shared": "*"
+    "@llm-seo-lab/shared": "*",
+    "@supabase/supabase-js": "^2.104.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

@@ -19,6 +19,15 @@ import { readFile, writeFile, readdir, stat } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
+import {
+  readUseCaseState,
+  recordUseCaseEvent,
+  pullRecommend,
+  pullApplyArtifact,
+  pullAnalyze,
+  trackCitationsDeprecated,
+  readCitationTrendDeprecated,
+} from "./v030.ts";
 
 export interface RepoMetadata {
   repo_path: string;
@@ -942,14 +951,26 @@ export function registerAllTools(ctx: ToolContext, registry: ToolRegistry): void
   registry.register(emitSchema);
   registry.register(openPr);
   registry.register(oracleQuery);
-  registry.register(trackCitations);
+  // v0.3.0: track_citations is kept registered for backward compatibility,
+  // but every invocation returns the deprecation envelope (spec §5.2).
+  // The original `trackCitations` descriptor remains exported for existing
+  // unit tests that exercise the v0.2.0 aggregation logic directly.
+  registry.register(trackCitationsDeprecated);
   registry.register(compareCompetitors);
   registry.register(readPrStatus);
   registry.register(readResults);
   registry.register(listSites);
   registry.register(readLatestAudit);
   registry.register(listPrs);
-  registry.register(readCitationTrend);
+  // v0.3.0: read_citation_trend follows the same deprecation pattern as
+  // track_citations.
+  registry.register(readCitationTrendDeprecated);
+  // v0.3.0 citation-pull workflow tools (spec §5.1).
+  registry.register(readUseCaseState);
+  registry.register(recordUseCaseEvent);
+  registry.register(pullRecommend);
+  registry.register(pullApplyArtifact);
+  registry.register(pullAnalyze);
 }
 
 export function expectedTactics(): AeoTactic[] {

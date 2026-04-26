@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@llm-seo-lab/shared": "*",
+    "@supabase/ssr": "^0.10.2",
+    "@supabase/supabase-js": "^2.104.1",
     "next": "^15.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
