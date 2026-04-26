@@ -1,0 +1,13 @@
+{
+  "id": "u3-youtube-fM2hpqPx8zg",
+  "url": "https://youtu.be/fM2hpqPx8zg?si=mAnjJkN4miAhFLem",
+  "substrate": "youtube",
+  "title": "YouTube — context engineering walkthrough",
+  "topic": "context engineering walkthrough for LLM apps",
+  "target_audience": "AI builders watching short-form technical walkthroughs on context engineering",
+  "owner": "SharathSPhD",
+  "notes": "YouTube video. Adapter operates on title / description / tags / chapter timestamps / pinned-comment / end-card text only — voice profile = direct-and-ephemeral. No auto-publish; artifact is a copy-paste checklist mapped to YouTube Studio fields.",
+  "seed": true,
+  "seeded_at": "2026-04-26",
+  "v030_phase": "R7"
+}

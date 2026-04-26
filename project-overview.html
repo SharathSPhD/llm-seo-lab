@@ -1,0 +1,1612 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>llm-seo-lab — project overview (v0.2.0)</title>
+<meta name="description" content="Single-file ground-truth tour of the llm-seo-lab project from initial brief through v0.2.0, with a synthesis layer that goes beyond the documentation." />
+<style>
+/* -------------------------------------------------------------------------- *
+ * llm-seo-lab project-overview.html — inline stylesheet                      *
+ * No external CSS. Two themes (dark default, light optional).                *
+ * Tier 1 (documented) sections use a subtle blue spine; Tier 2 (synthesis)   *
+ * sections use a gold spine. Print stylesheet at the end.                    *
+ * -------------------------------------------------------------------------- */
+:root {
+  --bg: #0e1014;
+  --surface: #161922;
+  --surface-2: #1c2030;
+  --surface-3: #232938;
+  --border: #2b3245;
+  --text: #e7eaf0;
+  --muted: #9aa3b2;
+  --link: #8ab4ff;
+  --link-hover: #b3ccff;
+  --tier1: #5ec27a;
+  --tier1-bg: rgba(94, 194, 122, 0.10);
+  --tier2: #ddb04d;
+  --tier2-bg: rgba(221, 176, 77, 0.12);
+  --warn: #ff8a5b;
+  --warn-bg: rgba(255, 138, 91, 0.12);
+  --ok: #5ec27a;
+  --bad: #ff6c6c;
+  --code-bg: #11141c;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Inter, system-ui, sans-serif;
+  --shadow: 0 1px 0 rgba(255,255,255,0.03), 0 8px 24px rgba(0,0,0,0.35);
+  --max: 1180px;
+}
+[data-theme="light"] {
+  --bg: #f8f9fb;
+  --surface: #ffffff;
+  --surface-2: #f1f3f7;
+  --surface-3: #e7eaef;
+  --border: #d8dde5;
+  --text: #1d2330;
+  --muted: #5a6273;
+  --link: #2b5fd9;
+  --link-hover: #1a48b5;
+  --tier1: #1a8a3a;
+  --tier1-bg: rgba(26, 138, 58, 0.08);
+  --tier2: #a37414;
+  --tier2-bg: rgba(163, 116, 20, 0.10);
+  --warn: #c44a16;
+  --warn-bg: rgba(196, 74, 22, 0.10);
+  --code-bg: #f3f4f8;
+  --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 6px 18px rgba(0,0,0,0.06);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+body {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+a { color: var(--link); text-decoration: none; }
+a:hover { color: var(--link-hover); text-decoration: underline; }
+code, pre, kbd, samp { font-family: var(--mono); }
+code { background: var(--code-bg); padding: 0.08em 0.35em; border-radius: 4px; font-size: 0.92em; }
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.55;
+}
+pre code { background: transparent; padding: 0; }
+
+/* Top app bar */
+.appbar {
+  position: sticky; top: 0; z-index: 30;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.appbar-inner {
+  max-width: var(--max); margin: 0 auto;
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 22px;
+}
+.brand {
+  font-weight: 650; letter-spacing: -0.01em; font-size: 16px;
+}
+.brand .ver {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 1px 8px; border-radius: 999px;
+  background: var(--tier1-bg); color: var(--tier1);
+  font-size: 12px; font-weight: 600;
+  border: 1px solid color-mix(in srgb, var(--tier1) 40%, transparent);
+}
+.brand .when {
+  margin-left: 10px; color: var(--muted); font-size: 12.5px; font-weight: 500;
+}
+.appbar-tools { margin-left: auto; display: flex; gap: 8px; }
+.btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 7px;
+  padding: 6px 11px;
+  font: inherit; font-size: 13px; font-weight: 500;
+  cursor: pointer;
+}
+.btn:hover { background: var(--surface-2); border-color: color-mix(in srgb, var(--border) 80%, var(--text) 20%); }
+
+/* Layout: sticky TOC + main */
+.shell {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 28px 22px 80px;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 36px;
+}
+@media (max-width: 980px) {
+  .shell { grid-template-columns: 1fr; }
+  .toc { position: static !important; max-height: none !important; }
+}
+
+/* Table of contents */
+.toc {
+  position: sticky; top: 70px;
+  align-self: start;
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
+  border-left: 1px solid var(--border);
+  padding: 4px 0 4px 16px;
+  font-size: 13.5px;
+}
+.toc h4 {
+  margin: 8px 0 6px;
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); font-weight: 600;
+}
+.toc h4:first-child { margin-top: 0; }
+.toc ol { list-style: none; margin: 0 0 14px; padding: 0; }
+.toc li { margin: 0; padding: 2px 0; }
+.toc a {
+  color: var(--text); display: block;
+  padding: 3px 0 3px 8px;
+  border-left: 2px solid transparent;
+  margin-left: -10px;
+}
+.toc a:hover { color: var(--link); border-left-color: var(--link); text-decoration: none; }
+.toc .active { color: var(--link); border-left-color: var(--link); font-weight: 600; }
+.toc .num { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: 6px; font-size: 12px; }
+
+/* Section presentation */
+.hero {
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+  border-radius: 14px;
+  padding: 28px 28px 24px;
+  margin-bottom: 32px;
+  box-shadow: var(--shadow);
+}
+.hero h1 {
+  font-size: 30px; line-height: 1.2; letter-spacing: -0.02em;
+  margin: 0 0 8px;
+}
+.hero p { color: var(--muted); margin: 0 0 6px; }
+.hero .pills { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 12px; font-weight: 600;
+  background: var(--surface-2); color: var(--muted);
+  border: 1px solid var(--border);
+}
+.pill.ok { background: var(--tier1-bg); color: var(--tier1); border-color: color-mix(in srgb, var(--tier1) 40%, transparent); }
+.pill.tier2 { background: var(--tier2-bg); color: var(--tier2); border-color: color-mix(in srgb, var(--tier2) 40%, transparent); }
+.pill.warn { background: var(--warn-bg); color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+
+section.sec { padding: 28px 0 8px; scroll-margin-top: 76px; }
+section.sec + section.sec { border-top: 1px solid var(--border); }
+section.sec h2 {
+  margin: 0 0 6px;
+  font-size: 22px; line-height: 1.25; letter-spacing: -0.01em;
+  display: flex; align-items: baseline; gap: 12px;
+}
+section.sec h2 .hash {
+  color: var(--muted); font-variant-numeric: tabular-nums;
+  font-weight: 600; font-size: 16px;
+}
+section.sec h2 .badge {
+  margin-left: auto; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 4px;
+}
+section.sec.tier1 { border-left: 3px solid color-mix(in srgb, var(--link) 60%, transparent); padding-left: 18px; }
+section.sec.tier2 { border-left: 3px solid var(--tier2); padding-left: 18px; }
+section.sec.tier1 h2 .badge { background: rgba(138,180,255,0.10); color: var(--link); border: 1px solid color-mix(in srgb, var(--link) 40%, transparent); }
+section.sec.tier2 h2 .badge { background: var(--tier2-bg); color: var(--tier2); border: 1px solid color-mix(in srgb, var(--tier2) 40%, transparent); }
+section.sec .lede { color: var(--muted); margin-top: 0; margin-bottom: 14px; font-size: 14px; }
+section.sec h3 { margin: 22px 0 8px; font-size: 16.5px; }
+section.sec h4 { margin: 16px 0 6px; font-size: 14.5px; color: var(--muted); text-transform: none; letter-spacing: 0; font-weight: 600; }
+section.sec ul, section.sec ol { padding-left: 22px; }
+section.sec ul li, section.sec ol li { margin: 4px 0; }
+section.sec p { margin: 8px 0; }
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 10px 0;
+}
+.card.warn { background: var(--warn-bg); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+.card.tier2 { background: var(--tier2-bg); border-color: color-mix(in srgb, var(--tier2) 40%, transparent); }
+.card.ok { background: var(--tier1-bg); border-color: color-mix(in srgb, var(--tier1) 40%, transparent); }
+.card .h { font-weight: 700; margin-bottom: 6px; }
+
+/* Tables */
+table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13.5px; margin: 10px 0;
+  border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+}
+th, td { padding: 9px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+th { background: var(--surface-2); font-weight: 650; color: var(--text); font-size: 12.5px; }
+tr:last-child td { border-bottom: 0; }
+td.mono, th.mono { font-family: var(--mono); font-size: 12.5px; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.center { text-align: center; }
+.tag-ok { color: var(--ok); font-weight: 600; }
+.tag-bad { color: var(--bad); font-weight: 600; }
+.tag-warn { color: var(--warn); font-weight: 600; }
+.tag-muted { color: var(--muted); }
+
+/* Hybrid panel: collapsible "View full document" */
+details.doc {
+  margin: 10px 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
+}
+details.doc > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 9px 14px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13.5px;
+  background: var(--surface-2);
+  user-select: none;
+}
+details.doc > summary::-webkit-details-marker { display: none; }
+details.doc > summary::before {
+  content: "►"; font-size: 10px; color: var(--muted); transition: transform 0.15s;
+}
+details.doc[open] > summary::before { transform: rotate(90deg); }
+details.doc > summary .path {
+  font-family: var(--mono); font-size: 12.5px; color: var(--muted); margin-left: auto;
+}
+details.doc .doc-body {
+  padding: 14px 18px;
+  font-size: 14px;
+  line-height: 1.65;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  max-height: 720px; overflow-y: auto;
+}
+details.doc .doc-body img { max-width: 100%; }
+details.doc .doc-body pre { font-size: 12.5px; }
+details.doc .doc-body table { font-size: 12.5px; }
+details.doc .doc-body h1 { font-size: 19px; margin-top: 10px; }
+details.doc .doc-body h2 { font-size: 17px; margin-top: 18px; }
+details.doc .doc-body h3 { font-size: 15px; margin-top: 14px; }
+details.doc .doc-body .loading, details.doc .doc-body .err {
+  color: var(--muted); font-style: italic; padding: 10px 0;
+}
+details.doc .doc-body .err { color: var(--warn); }
+
+/* Mermaid containers */
+.mermaid {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  margin: 12px 0;
+  overflow-x: auto;
+  font-family: var(--mono);
+}
+
+/* ASCII bar charts */
+.bars { font-family: var(--mono); font-size: 12.5px; line-height: 1.7; white-space: pre; background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; overflow-x: auto; }
+
+/* Quote block (verbatim user prompt) */
+blockquote.verbatim {
+  border-left: 3px solid var(--tier2);
+  padding: 12px 16px;
+  margin: 14px 0;
+  background: var(--tier2-bg);
+  border-radius: 0 8px 8px 0;
+  font-style: normal;
+  color: var(--text);
+  white-space: pre-wrap;
+  font-size: 14px;
+}
+blockquote.verbatim .src { display: block; font-size: 12px; font-weight: 600; color: var(--tier2); margin-bottom: 8px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+/* Fine print + footer */
+.note { color: var(--muted); font-size: 13px; }
+.footer {
+  max-width: var(--max); margin: 0 auto;
+  padding: 22px; color: var(--muted); font-size: 12.5px;
+  border-top: 1px solid var(--border); text-align: center;
+}
+
+/* Copy buttons */
+.copy-wrap { position: relative; }
+.copy-wrap .copy {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--muted); border-radius: 5px; padding: 3px 8px;
+  font-size: 11px; cursor: pointer;
+}
+.copy-wrap .copy:hover { color: var(--text); }
+.copy-wrap .copy.copied { color: var(--ok); border-color: var(--ok); }
+
+/* Print stylesheet */
+@media print {
+  body { background: white; color: black; font-size: 11pt; }
+  .appbar, .toc, .appbar-tools, .copy { display: none !important; }
+  .shell { grid-template-columns: 1fr; padding: 0; }
+  details.doc { break-inside: avoid; }
+  details.doc[open] .doc-body { max-height: none; }
+  details.doc:not([open]) > summary::after {
+    content: " (collapsed in print)"; color: #666; font-size: 10pt;
+  }
+  section.sec { page-break-inside: avoid; }
+  a { color: black; text-decoration: underline; }
+  pre, .card, table { border-color: #999; }
+  th, td { border-color: #ccc; }
+  .mermaid { background: white; border-color: #ccc; }
+}
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <div class="appbar-inner">
+    <div class="brand">
+      llm-seo-lab — project overview
+      <span class="ver">v0.2.0</span>
+      <span class="when">page generated 2026-04-26 · live PR re-fetched at top of file</span>
+    </div>
+    <div class="appbar-tools">
+      <button class="btn" id="theme-toggle" type="button" aria-label="Toggle theme">Light</button>
+      <button class="btn" onclick="window.print()" type="button">Print / PDF</button>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+
+<!-- ========================== TABLE OF CONTENTS =========================== -->
+<nav class="toc" aria-label="Table of contents">
+  <h4>Tier 1 — documented</h4>
+  <ol>
+    <li><a href="#s01"><span class="num">01</span>Original ask</a></li>
+    <li><a href="#s02"><span class="num">02</span>What this is / isn't</a></li>
+    <li><a href="#s03"><span class="num">03</span>Methodology pipeline</a></li>
+    <li><a href="#s04"><span class="num">04</span>TRIZ contradictions</a></li>
+    <li><a href="#s05"><span class="num">05</span>ARIZ-85C</a></li>
+    <li><a href="#s06"><span class="num">06</span>Solution finalists F1 / F2</a></li>
+    <li><a href="#s07"><span class="num">07</span>System architecture</a></li>
+    <li><a href="#s08"><span class="num">08</span>Closed-loop AEO</a></li>
+    <li><a href="#s09"><span class="num">09</span>Phase 6 benchmarks</a></li>
+    <li><a href="#s10"><span class="num">10</span>Phase 7 cohort</a></li>
+    <li><a href="#s11"><span class="num">11</span>Adversarial review</a></li>
+    <li><a href="#s12"><span class="num">12</span>Pratyakṣa adoption</a></li>
+    <li><a href="#s13"><span class="num">13</span>R-sweep R1–R7</a></li>
+    <li><a href="#s14"><span class="num">14</span>Repository surfaces</a></li>
+    <li><a href="#s15"><span class="num">15</span>Limitations (verbatim)</a></li>
+    <li><a href="#s16"><span class="num">16</span>v0.2.0 changelog</a></li>
+    <li><a href="#s17"><span class="num">17</span>Reproduce locally</a></li>
+  </ol>
+  <h4>Tier 2 — synthesis</h4>
+  <ol>
+    <li><a href="#s18"><span class="num">18</span>Live PR ground-truth</a></li>
+    <li><a href="#s19"><span class="num">19</span>Loop timing autopsy</a></li>
+    <li><a href="#s20"><span class="num">20</span>Review→fix traceability</a></li>
+    <li><a href="#s21"><span class="num">21</span>Tools claimed vs verified</a></li>
+    <li><a href="#s22"><span class="num">22</span>Binding constraints</a></li>
+    <li><a href="#s23"><span class="num">23</span>30 / 60 / 90 day roadmap</a></li>
+    <li><a href="#s24"><span class="num">24</span>Outside-reviewer questions</a></li>
+    <li><a href="#s25"><span class="num">25</span>Production-readiness</a></li>
+    <li><a href="#s26"><span class="num">26</span>Open questions for owner</a></li>
+  </ol>
+  <h4>v0.3.0 — citation-pull reorientation</h4>
+  <ol>
+    <li><a href="#s28"><span class="num">28</span>v0.3.0 reorientation overview</a></li>
+    <li><a href="#s29"><span class="num">29</span>Citation-pull TRIZ charter</a></li>
+    <li><a href="#s30"><span class="num">30</span>State machine + dashboard</a></li>
+    <li><a href="#s31"><span class="num">31</span>Substrate adapters</a></li>
+    <li><a href="#s32"><span class="num">32</span>Three live use cases</a></li>
+    <li><a href="#s33"><span class="num">33</span>v0.3.0 R-sweep R1–R7</a></li>
+    <li><a href="#s34"><span class="num">34</span>v0.3.0 verification</a></li>
+  </ol>
+  <h4>Reference</h4>
+  <ol>
+    <li><a href="#s27"><span class="num">27</span>Provenance index</a></li>
+  </ol>
+</nav>
+
+<!-- ============================== MAIN COLUMN ============================= -->
+<main>
+
+<!-- HERO ------------------------------------------------------------------- -->
+<div class="hero">
+  <h1>Closed-loop autonomous citation engineering for AEO/LLM-SEO.</h1>
+  <p>A monorepo that takes a customer URL and ends with a real pull request against their repository — same Claude Code CLI loop audits, drafts, opens the PR, and re-audits. TRIZ + attractor-flow drove the design; an adversarial review reset the integration; a Pratyakṣa epistemology gate now sits between the draft and the PR.</p>
+  <p>This page is the single ground-truth tour from <em>"expand on the SEO research material…"</em> (the original brief) through the <code>v0.2.0</code> tag and the first live PR. Every section links to its source artifact; nothing on this page is invented.</p>
+  <div class="pills">
+    <span class="pill ok">v0.2.0 tagged 2026-04-25</span>
+    <span class="pill ok">PR #1 live · OPEN</span>
+    <span class="pill ok">7 ralph-loop phases COMPLETE</span>
+    <span class="pill">16 MCP tools · 7 plugin commands · 6 skills</span>
+    <span class="pill warn">3 known stubs · 5 honest limitations</span>
+    <span class="pill tier2">Tier 2 synthesis layer below the documented sections</span>
+  </div>
+</div>
+
+<!-- =====================================================================
+     TIER 1 · DOCUMENTED SECTIONS
+     ===================================================================== -->
+
+<!-- S01 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s01">
+  <h2><span class="hash">§01</span>The original ask <span class="badge">Tier 1</span></h2>
+  <p class="lede">The brief that started the project, preserved verbatim. Every later artifact is a response to a clause in this paragraph.</p>
+
+  <blockquote class="verbatim">
+<span class="src">User · 2026-04-25 · turn 1</span>expand on the seo research material…add your own research (browse)….the end objective is to innovate a solution (with different elements like plugin/mcp/skills leading to a product) that is so compelling that it will become a path breaking solution to the new field of aeo/llm seo…this has to be scientifically built up by first understanding the root conflict, using triz plugin (/analyze /ariz /evaluator-agent /ifr /matrix /principles ) (it is enabled with mcp and skills)….the output is documents that reflect 1)problem and gap identification in seo/aeo/llm seo …find the key contradictions 2)a novel solution identification 3)translation of the solution to plugin/mcp/skills framework and also possibly enhance it to standalone app 4)validation and benchmarking (looking at sota solutions in this space) with statistical rigour in terms of hypothesis testing, A/B, power analysis…the plugin or app should use claude code cli (the cli will be subscription based and not api) 5)prove the solution (plugin and app) through use cases outside the benchmark…real life seo use cases for appropriate clients 6)use git work trees and multi agent orchestration..push to github (SharathSPhD) at appropriate frequencies (you are already connected…don't use any email or add any other contributor)…. use /using-superpowers /brainstorming /plugin-architect /build-mcp-app /writing-plans the outputs should also be spec, prd, plan documents before starting implementation use attractor-flow plugin (https://github.com/SharathSPhD/attractor-flow.git) if the plugin is not installed..install and test it properly (you can use reload-plugins slash commands to load it without restarting the session)…the key is to use attractor-flow plugin in combination with triz-engine plugin to force the system to arrive to completely creative solutions and then take the help of attractor flow plugin agents to converge towards a solution….use /ralph-loop to ensure completeness…..this is a complex and long-running task..so build accordingly….. use /seo-auditto help you build…ask clarifying questions as much as possible
+  </blockquote>
+
+  <p>A second steering message arrived after the v0.1.0-alpha.1 architecture review:</p>
+
+  <blockquote class="verbatim">
+<span class="src">User · 2026-04-25 · post-review turn</span>review and incorporate what is valid from docs/reviews/2026-04-25-adversarial-architecture-review.md 2)git push frequently 3)the new aeo plugin should be created and pushed to the monorepo…as you build and improvise it needs to be updated, and the updated plugin used (the plugin can be cursor based and claude code cli based…wherever it is applied) 4)you haven't run the cli with the app/plugin…move towards actual implementation now 5)bring in aspects of epistemology derived from https://github.com/SharathSPhD/pratyaksha-context-eng-harness.git let triz and attractor-flow decide if some of those concepts deserve integration for the aeo plugin/app …use ralph loop to enforce completion…ask questions
+  </blockquote>
+
+  <p>Mapping each clause of the brief to the artifact that addresses it:</p>
+  <table>
+    <thead><tr><th>Clause</th><th>Resolved by</th></tr></thead>
+    <tbody>
+      <tr><td>(1) problem &amp; gap identification, key contradictions</td><td><code>docs/research/seo_research_2.md</code> · <code>docs/triz/contradiction-cards.md</code></td></tr>
+      <tr><td>(2) novel solution identification</td><td><code>docs/triz/ariz-session.md</code> · <code>docs/triz/solution-finalists.md</code> (F1 + F2)</td></tr>
+      <tr><td>(3) translation to plugin / MCP / skills / standalone app</td><td><code>plugin/</code> (dual-target Cursor + Claude Code) · <code>mcp/</code> (16 tools) · <code>skills/</code> (6) · <code>apps/web/</code> (Next.js)</td></tr>
+      <tr><td>(4) validation &amp; benchmarking with statistical rigour</td><td><code>benchmarks/runs/local/</code> · <code>docs/benchmarks/methodology.md</code></td></tr>
+      <tr><td>(5) prove on real-life client sites</td><td><code>docs/use-cases/P1..P5</code> + <code>docs/use-cases/P3-live-run-2026-04-25/</code> (real PR #1)</td></tr>
+      <tr><td>(6) push to <code>SharathSPhD</code>, no other contributors</td><td><code>SharathSPhD/llm-seo-lab</code> · PR opened by <code>llm-seo-lab[bot]</code> on behalf of <code>SharathSPhD/SharathSPhD.github.io#1</code></td></tr>
+      <tr><td>TRIZ + attractor-flow forced creativity → convergence</td><td><code>.triz/session.jsonl</code> · <code>docs/triz/r3-pratyaksha-attractor.json</code> · <code>docs/triz/attractor-trajectory.json</code></td></tr>
+      <tr><td>Pratyakṣa epistemology integration (post-review)</td><td><code>docs/decisions/2026-04-26-pratyaksha-integration.md</code> · Manas/Buddhi gate in <code>packages/cli-worker/src/runners/loop.ts</code></td></tr>
+      <tr><td>Subscription Claude CLI, never API key</td><td>Sākṣī invariant in <code>plugin/scripts/aeo-sakshi.sh</code></td></tr>
+      <tr><td>/ralph-loop completeness</td><td>Seven phase reports in <code>docs/ralph-runs/</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- S02 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s02">
+  <h2><span class="hash">§02</span>What this project is — and is not <span class="badge">Tier 1</span></h2>
+  <p class="lede">A short, blunt scoping pass before the architecture pages. Reproduces the spirit of <code>docs/spec/2026-04-25-llm-seo-lab-design.md</code> and the explicit caveats in <code>docs/limitations.md</code>.</p>
+
+  <h3>It is</h3>
+  <ul>
+    <li>A <strong>monorepo</strong> for a closed-loop AEO product: audit a URL → identify citation gaps → draft a fix as a PR → measure post-merge.</li>
+    <li>A <strong>dual-target plugin</strong> (Cursor + Claude Code CLI) that ships seven slash-commands plus a Sākṣī <code>SessionStart</code> hook.</li>
+    <li>A <strong>Node/TypeScript MCP server</strong> exposing 16 tools over <code>POST http://127.0.0.1:7301/rpc</code>, all returning the typed <code>{ ok, value } | { ok:false, error }</code> envelope.</li>
+    <li>A <strong>Next.js dashboard</strong> on the same MCP wire — read-side tools (<code>list_sites</code>, <code>read_latest_audit</code>, <code>list_prs</code>, <code>read_citation_trend</code>) feed it directly.</li>
+    <li>A <strong>real-evidence project</strong>: PR #1 against <code>SharathSPhD/SharathSPhD.github.io</code> exists and is open <em>today</em>.</li>
+    <li><strong>Subscription-Claude-CLI native.</strong> No API keys. Ever. (<code>aeo-sakshi.sh</code> pins this as a witness invariant.)</li>
+  </ul>
+
+  <h3>It is <em>not</em></h3>
+  <ul>
+    <li>A SaaS dashboard you can subscribe to — there is no tenant model, no auth, no hosting.</li>
+    <li>A drop-in replacement for Profound, Peec, Goodie, AthenaHQ, Otterly, etc. The reasoning core overlaps; the operational surface (<em>action</em>, not just <em>monitoring</em>) is the wedge — and only one site has been driven end-to-end so far.</li>
+    <li>A real-time citation-tracking platform. <code>track_citations</code> is honest about being a stub; the Playwright crawler is a placeholder. T+14 lift is not measured in <code>v0.2.0</code>.</li>
+    <li>An autonomous publisher. Every action is a PR awaiting a human. The loop's terminal state is <code>next_step: "human_review"</code>.</li>
+    <li>A model-trained system. There is no training step. Claude Code CLI is the reasoner; everything else is plumbing.</li>
+  </ul>
+
+  <h3>Counts (verifiable from the tree)</h3>
+  <table>
+    <thead><tr><th>Surface</th><th class="num">Count</th><th>Source of truth</th></tr></thead>
+    <tbody>
+      <tr><td>MCP tools</td><td class="num">16</td><td><code>mcp/src/tools/index.ts</code> (1 stub: <code>track_citations</code>)</td></tr>
+      <tr><td>Plugin commands</td><td class="num">7</td><td><code>plugin/commands/aeo:*.md</code></td></tr>
+      <tr><td>Skills</td><td class="num">6</td><td><code>skills/aeo-audit</code>, …, <code>skills/competitive-citation-intel</code></td></tr>
+      <tr><td>Phase reports (R-sweep)</td><td class="num">7</td><td><code>docs/ralph-runs/R1.md</code> … <code>R7.md</code></td></tr>
+      <tr><td>Use-case files</td><td class="num">5</td><td><code>docs/use-cases/P1..P5</code> reports</td></tr>
+      <tr><td>Live PRs opened by the loop</td><td class="num">1</td><td><a href="https://github.com/SharathSPhD/SharathSPhD.github.io/pull/1" target="_blank" rel="noopener">SharathSPhD.github.io#1</a></td></tr>
+      <tr><td>Adversarial review findings remediated</td><td class="num">9 / 12</td><td>see §20 traceability matrix</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- S03 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s03">
+  <h2><span class="hash">§03</span>Methodology pipeline — TRIZ × attractor-flow × ralph-loop <span class="badge">Tier 1</span></h2>
+  <p class="lede">The brief explicitly names the chain: TRIZ for divergence and contradiction surfacing, attractor-flow for convergence, ralph-loop for completeness. Below is the actual chain that ran, with the artifact IDs each stage produced.</p>
+
+  <div class="mermaid">
+flowchart TD
+  R[/research<br/>3 parallel subagents/] --> RES[docs/research/*.md]
+  RES --> CC[TRIZ contradiction cards<br/>5 cards · IFR scored 3-4]
+  CC --> ARIZ[ARIZ-85C deep dive on C1]
+  ARIZ --> SK[8 divergent sketches S1-S8]
+  SK --> AF[attractor-flow convergence<br/>FTLE · basin · perturbation]
+  AF --> FIN[2 finalists F1 PR-as-product · F2 CMS]
+  FIN --> SPEC[spec.md · prd.md · plan.md<br/>writing-plans gate]
+  SPEC --> BUILD[implementation across<br/>plugin / mcp / skills / cli-worker / apps/web]
+  BUILD --> BENCH[Phase 6 benchmarks<br/>statistical pipeline]
+  BUILD --> P7[Phase 7 cohort + LIVE RUN PR #1]
+  BUILD --> REV[/architect-review adversarial review/]
+  REV --> RSWP[R1-R7 ralph-loop sweep]
+  RSWP --> PRA[Pratyakṣa Sākṣī + Buddhi gate]
+  PRA --> v02[v0.2.0 release]
+  </div>
+
+  <p>Three primary research outputs, all generated by parallel subagents under the <code>/parallel</code> dispatcher and reviewed by the <code>brainstorming</code> + <code>architect-review</code> personas:</p>
+  <ul>
+    <li><code>docs/research/seo_research_1.md</code> — competitor matrix (12 SOTA tools).</li>
+    <li><code>docs/research/seo_research_2.md</code> — citation mechanism survey synthesizing the GEO paper plus public observational studies.</li>
+    <li><code>docs/research/geo-evidence-base.md</code> — Tier-1 / Tier-2 evidence policy that gates every later recommendation.</li>
+  </ul>
+
+  <p><strong>Hybrid panels.</strong> Below, every documented artifact appears as a one-line summary plus a collapsible "View full document" panel that lazy-loads the markdown via <code>fetch()</code> and renders it with <code>marked.js</code> on first open. Toggle a panel to read the source.</p>
+
+  <details class="doc"><summary>📄 Research synthesis — competitor matrix · <span class="path">docs/research/seo_research_1.md</span></summary><div class="doc-body" data-doc="docs/research/seo_research_1.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 Research synthesis — citation mechanisms · <span class="path">docs/research/seo_research_2.md</span></summary><div class="doc-body" data-doc="docs/research/seo_research_2.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 GEO evidence base — Tier-1/Tier-2 policy · <span class="path">docs/research/geo-evidence-base.md</span></summary><div class="doc-body" data-doc="docs/research/geo-evidence-base.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 Master plan / brief · <span class="path">docs/plans/llm-seo-lab-implementation-plan.md</span></summary><div class="doc-body" data-doc="docs/plans/llm-seo-lab-implementation-plan.md"><span class="loading">Click to load…</span></div></details>
+</section>
+
+<!-- S04 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s04">
+  <h2><span class="hash">§04</span>TRIZ — five contradictions, ranked by IFR <span class="badge">Tier 1</span></h2>
+  <p class="lede">Phase 2 produced five candidate contradictions. Each ran through the canonical pipeline: <code>suggest_parameters → lookup_matrix → get_principle → IFR → score_solution → log_session_entry → attractorflow_record_state</code>. The ledger is in <code>.triz/session.jsonl</code>.</p>
+
+  <table>
+    <thead>
+      <tr><th>#</th><th>Contradiction</th><th>Improving × worsening</th><th>Matrix principles</th><th class="num">IFR</th><th>Selected for ARIZ?</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>C1</td><td><strong>measure ↔ act</strong></td><td>#28 measurement accuracy × #38 automation</td><td>28, 2, 10, 34</td><td class="num"><strong>4</strong></td><td class="tag-ok">YES</td></tr>
+      <tr><td>C2</td><td>recency ↔ authority</td><td>#9 speed × #27 reliability</td><td>11, 35, 27, 28</td><td class="num">3</td><td class="tag-muted">no</td></tr>
+      <tr><td>C3</td><td>structure ↔ voice</td><td>#12 shape × #35 adaptability</td><td>1, 15, 29</td><td class="num"><strong>4</strong></td><td class="tag-muted">no (planned RCT)</td></tr>
+      <tr><td>C4</td><td>ToS-clean tracking ↔ ground-truth</td><td>#30 harmful factors × #24 info loss</td><td>22, 10, 2</td><td class="num"><strong>4</strong></td><td class="tag-muted">no</td></tr>
+      <tr><td>C5</td><td>single-LLM oracle ↔ multi-LLM reality</td><td>#32 ease of mfg × #35 adaptability</td><td>2, 13, 15</td><td class="num">3</td><td class="tag-muted">no</td></tr>
+    </tbody>
+  </table>
+
+  <p>The card for C1 contains the canonical IFR statement that became the project's north star:</p>
+  <div class="card">
+    <strong>C1 IFR (verbatim from <code>contradiction-cards.md</code>).</strong> "A system in which the act of measurement <em>is</em> the intervention. The same Claude CLI loop that audits a page also drafts the fix as a reviewable PR (rewritten copy + JSON-LD + internal links per the GEO-paper evidence policy), opens it against the customer's own repository, and re-audits after merge to attribute the lift. Cost = zero new infrastructure beyond resources the customer already has (git, CLI subscription, browser). Side effects = zero — every action is an explicit PR awaiting human review."
+  </div>
+
+  <details class="doc"><summary>📄 Contradiction cards (full) · <span class="path">docs/triz/contradiction-cards.md</span></summary><div class="doc-body" data-doc="docs/triz/contradiction-cards.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 TRIZ session ledger · <span class="path">.triz/session.jsonl</span></summary><div class="doc-body" data-doc=".triz/session.jsonl"><span class="loading">Click to load…</span></div></details>
+</section>
+
+<!-- S05 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s05">
+  <h2><span class="hash">§05</span>ARIZ-85C — the deep dive on C1 <span class="badge">Tier 1</span></h2>
+  <p class="lede">ARIZ converts a top contradiction into operational hypotheses. The session document enumerates the ideal final result, the resource inventory the customer already owns (git, CI, CLI subscription, browser), and the formal physical/technical contradictions.</p>
+  <p>The ARIZ output produced <strong>six refined sub-hypotheses</strong> that survived as constraints into the spec/PRD/plan. Two are visible in the live system:</p>
+  <ul>
+    <li>"<strong>Every action is a PR</strong>" — no autonomous merges, no blind publishing.</li>
+    <li>"<strong>Evidence policy gates draft</strong>" — Tier-1 references mandatory; Tier-2 require an active flag.</li>
+  </ul>
+  <details class="doc"><summary>📄 ARIZ-85C session · <span class="path">docs/triz/ariz-session.md</span></summary><div class="doc-body" data-doc="docs/triz/ariz-session.md"><span class="loading">Click to load…</span></div></details>
+</section>
+
+<!-- S06 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s06">
+  <h2><span class="hash">§06</span>Solution finalists — F1 (PR-as-product) and F2 (CMS) <span class="badge">Tier 1</span></h2>
+  <p class="lede">Eight divergent sketches were forced through TRIZ-IFR scoring, an evaluator-agent rubric, and an attractor-flow convergence run with FTLE / basin / perturbation metrics. Two finalists survived the joint screen.</p>
+
+  <table>
+    <thead><tr><th>Sketch</th><th>Headline</th><th class="num">IFR</th><th class="num">Eval/100</th><th class="num">FTLE</th><th class="num">Basin</th><th class="num">Goal d</th><th>Robust?</th></tr></thead>
+    <tbody>
+      <tr><td><strong>S1</strong></td><td>PR-as-product</td><td class="num">3</td><td class="num"><strong>90</strong></td><td class="num">0.062</td><td class="num">0.199</td><td class="num">1.163</td><td class="tag-ok">−0.01 ✅</td></tr>
+      <tr><td>S2</td><td>IDE-native autopilot</td><td class="num">3</td><td class="num">80</td><td class="num">0.099</td><td class="num">0.193</td><td class="num">1.384</td><td class="tag-ok">−0.16 ✅</td></tr>
+      <tr><td>S3</td><td>Dashboard apply</td><td class="num">3</td><td class="num">53</td><td class="num">0.083</td><td class="num">0.195</td><td class="num">1.330</td><td class="tag-muted">n/a</td></tr>
+      <tr><td>S4</td><td>CD swarm</td><td class="num">3</td><td class="num">39</td><td class="num"><strong>0.018</strong></td><td class="num"><strong>0.211</strong></td><td class="num">1.080</td><td class="tag-muted">n/a</td></tr>
+      <tr><td>S5</td><td>Inversion (engines come to you)</td><td class="num"><strong>4</strong></td><td class="num">70</td><td class="num">0.131</td><td class="num">0.183</td><td class="num"><strong>1.057</strong></td><td class="tag-bad">+0.22 ❌</td></tr>
+      <tr><td><strong>S6</strong></td><td>Spine + leaves CMS</td><td class="num"><strong>4</strong></td><td class="num">39</td><td class="num">0.093</td><td class="num">0.194</td><td class="num">1.158</td><td class="tag-muted">n/a</td></tr>
+      <tr><td>S7</td><td>Federated co-op</td><td class="num">3</td><td class="num">32</td><td class="num">0.142</td><td class="num">0.193</td><td class="num">1.358</td><td class="tag-muted">n/a</td></tr>
+      <tr><td>S8</td><td>Editorial marketplace</td><td class="num">3</td><td class="num">32</td><td class="num">0.087</td><td class="num">0.201</td><td class="num">1.236</td><td class="tag-muted">n/a</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Why S1 and not S5.</strong> S5 has the highest TRIZ-IFR (4) and the lowest goal distance (1.057), but it failed its perturbation test (Δ +0.22 — when CDN strips referrers and server logs aren't accessible, the entire measurement story collapses). S1 has the highest evaluator score (90) and survives its perturbation (Δ −0.01, regime unchanged). When TRIZ-quality and attractor-robustness disagreed, robustness won.</p>
+  <p><strong>Why a second finalist (F2 = S6 ⊕ S5).</strong> The five validation sites partition into git-native developer customers (technektar.dev, sharathsphd.github.io) and non-git-native publishers (technektar.substack.com). One finalist cannot honestly serve both. F2 (CMS spine-and-leaves composed with the inversion ingestion path) covers the publisher segment; both finalists share the Claude CLI reasoning core and differ only in <em>action substrate</em>.</p>
+
+  <div class="mermaid">
+flowchart LR
+  IDEA[8 sketches S1-S8] --> SCORE[TRIZ IFR + evaluator + FTLE + basin + perturb]
+  SCORE --> F1[F1 · S1 PR-as-product<br/>git-native devs<br/>SHIPPED v0.2.0]
+  SCORE --> F2[F2 · S6 ⊕ S5 CMS-native<br/>publishers<br/>DEFERRED to v0.3]
+  </div>
+
+  <details class="doc"><summary>📄 Solution finalists (full) · <span class="path">docs/triz/solution-finalists.md</span></summary><div class="doc-body" data-doc="docs/triz/solution-finalists.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 Attractor convergence (raw JSON, 8 sketches × 5 steps) · <span class="path">docs/triz/attractor-convergence.json</span></summary><div class="doc-body" data-doc="docs/triz/attractor-convergence.json"><span class="loading">Click to load…</span></div></details>
+</section>
+
+<!-- S07 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s07">
+  <h2><span class="hash">§07</span>System architecture <span class="badge">Tier 1</span></h2>
+  <p class="lede">Five surfaces, one MCP wire. The MCP server is the single point of contact between the IDE/CLI plugin, the Next.js dashboard, the cli-worker daemon, and the live-run script.</p>
+
+  <div class="mermaid">
+flowchart LR
+  user(User · IDE or CLI) -->|slash command| plugin[plugin/<br/>Cursor + Claude Code CLI<br/>7 commands · Sākṣī hook]
+  plugin -->|JSON-RPC| mcp[mcp/<br/>Node TS server<br/>POST :7301/rpc<br/>16 tools]
+  worker[packages/cli-worker/<br/>JSONL queue · loop runner] -->|JSON-RPC| mcp
+  web[apps/web/<br/>Next.js dashboard] -->|JSON-RPC| mcp
+  live[scripts/aeo-live-run.mjs] --> mcp
+  mcp -->|claude --print| claude[Claude Code CLI subscription]
+  mcp -->|gh pr create| gh[Customer GitHub repo]
+  mcp -->|playwright STUB| pw[browser sessions]
+  worker -->|sublate / detect_conflict| prat[pratyaksha MCP<br/>Python · uv]
+  plugin -->|set_sakshi at SessionStart| prat
+  </div>
+
+  <table>
+    <thead><tr><th>Surface</th><th>Path</th><th>Stack</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td>Plugin</td><td><code>plugin/</code></td><td>JSON manifests · bash hooks</td><td>Slash commands, Sākṣī hook, dual-target install</td></tr>
+      <tr><td>MCP server</td><td><code>mcp/</code></td><td>Node 22 + TypeScript (<code>--experimental-strip-types</code>)</td><td>16 JSON-RPC tools, the only authoritative wire</td></tr>
+      <tr><td>CLI worker</td><td><code>packages/cli-worker/</code></td><td>Node + TypeScript</td><td>Loop runner, JSONL job queue, WebSocket events</td></tr>
+      <tr><td>Web dashboard</td><td><code>apps/web/</code></td><td>Next.js 15 App Router</td><td>Read-only views; uses 4 read-side MCP tools</td></tr>
+      <tr><td>Skills</td><td><code>skills/</code></td><td>Claude Code skills + Python harness</td><td>aeo-audit · citation-oracle-loop · …</td></tr>
+      <tr><td>Shared types</td><td><code>packages/shared/</code></td><td>TypeScript</td><td>SiteConfig, gap/citation/PR DTOs, engine ids</td></tr>
+      <tr><td>Pratyakṣa client</td><td><code>tools/pratyaksha/</code> (vendored submodule)</td><td>Python · uv</td><td>set_sakshi · detect_conflict · sublate_with_evidence · context_insert</td></tr>
+    </tbody>
+  </table>
+
+  <details class="doc"><summary>📄 Architecture document · <span class="path">docs/spec/2026-04-25-llm-seo-lab-design.md</span></summary><div class="doc-body" data-doc="docs/spec/2026-04-25-llm-seo-lab-design.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 Spec · <span class="path">docs/spec/2026-04-25-llm-seo-lab-design.md</span></summary><div class="doc-body" data-doc="docs/spec/2026-04-25-llm-seo-lab-design.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 PRD with pricing tiers · <span class="path">docs/prd/llm-seo-lab-prd.md</span></summary><div class="doc-body" data-doc="docs/prd/llm-seo-lab-prd.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 Plugin architecture · <span class="path">docs/spec/plugin-architecture.md</span></summary><div class="doc-body" data-doc="docs/spec/plugin-architecture.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 MCP server design · <span class="path">docs/spec/mcp-design.md</span></summary><div class="doc-body" data-doc="docs/spec/mcp-design.md"><span class="loading">Click to load…</span></div></details>
+</section>
+
+<!-- S08 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s08">
+  <h2><span class="hash">§08</span>The closed loop, phase by phase <span class="badge">Tier 1</span></h2>
+  <p class="lede">Six steps, terminal state <code>next_step ∈ { human_review, no_qualifying_gaps, no_seed_pages, quota_exhausted, buddhi_blocked }</code>. This is the C1 IFR turned into a function.</p>
+  <ol>
+    <li><strong>read_config</strong>(<code>site_id</code>) — load <code>data/sites/&lt;id&gt;/config.json</code> (<code>seed_pages</code>, <code>max_gaps_per_pr</code>, <code>repo_path</code>, <code>evidence_policy</code>).</li>
+    <li><strong>audit_page</strong>(<code>page_url</code>) per seed page — Claude CLI returns ranked <code>AuditGap[]</code>; on failure, deterministic <code>fallback-stub</code> keeps the loop alive.</li>
+    <li><strong>filter + rank</strong> — keep only Tier-1 references above <code>min_predicted_lift_pp</code>; sort descending by predicted lift; cap at <code>max_gaps_per_pr</code> (default 3).</li>
+    <li><strong>generate_brief</strong> per surviving gap (Manas) — same fail-open behaviour as audit_page.</li>
+    <li><strong>Buddhi gate</strong> — <code>pratyaksha.detect_conflict</code> against the prior audit; on conflict, <code>sublate_with_evidence</code>; brief is blocked or sublated, never silently overwritten.</li>
+    <li><strong>open_pr</strong>(<code>repo_path</code>, <code>branch</code>, briefs) — clone repo to temp dir, write <code>docs/aeo-briefs/&lt;brief_id&gt;.md</code> per cleared brief, commit as <code>llm-seo-lab[bot]</code>, push, <code>gh pr create</code>.</li>
+  </ol>
+  <p><strong>Re-audit after merge</strong> closes the loop. In <code>v0.2.0</code>, T+0 baselines are written to each PR body; T+1d / T+7d / T+14d delta capture is on hold until <code>track_citations</code> is real (see §15.1).</p>
+  <details class="doc"><summary>📄 Loop runner source · <span class="path">packages/cli-worker/src/runners/loop.ts</span></summary><div class="doc-body" data-doc="packages/cli-worker/src/runners/loop.ts"><span class="loading">Click to load…</span></div></details>
+</section>
+
+<!-- S09 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s09">
+  <h2><span class="hash">§09</span>Phase 6 — statistical benchmarks <span class="badge">Tier 1</span></h2>
+  <p class="lede">A controlled-by-construction benchmarking pipeline against simulated Bernoulli arms calibrated to the GEO-survey midpoint, with proper power analysis and pre-registration. The release is honest about the simulation: it validates the <em>statistical pipeline</em>, not real-world lift.</p>
+  <p>Reading the headline numbers from <code>benchmarks/runs/local/summary.json</code>:</p>
+
+  <table>
+    <thead><tr><th>Tactic</th><th class="num">Predicted lift</th><th class="num">Observed Δ</th><th class="num">95% CI</th><th class="num">p</th><th>Decision</th></tr></thead>
+    <tbody>
+      <tr><td>Cite Sources</td><td class="num">+30–40 pp</td><td class="num">+33.4 pp</td><td class="num">[+27.8, +38.9]</td><td class="num">&lt; 0.001</td><td class="tag-ok">ship</td></tr>
+      <tr><td>Quotation Addition</td><td class="num">+30–40 pp</td><td class="num">+31.7 pp</td><td class="num">[+26.0, +37.4]</td><td class="num">&lt; 0.001</td><td class="tag-ok">ship</td></tr>
+      <tr><td>Statistics Addition</td><td class="num">+30–40 pp</td><td class="num">+34.2 pp</td><td class="num">[+28.5, +39.7]</td><td class="num">&lt; 0.001</td><td class="tag-ok">ship</td></tr>
+      <tr><td>FAQ-only schema</td><td class="num">controlled-evidence absent</td><td class="num">+5.1 pp</td><td class="num">[−0.7, +10.9]</td><td class="num">0.087</td><td class="tag-warn">no-go (under-powered)</td></tr>
+      <tr><td>Keyword Stuffing</td><td class="num">−10 to −20 pp</td><td class="num">−14.6 pp</td><td class="num">[−20.0, −9.0]</td><td class="num">&lt; 0.001</td><td class="tag-bad">refuse</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Δ visual (ASCII, ±50 pp clamp)</h3>
+  <pre class="bars">
+Cite Sources       │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░█████████████████ +33.4
+Quotation          │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░████████████████  +31.7
+Statistics         │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██████████████████ +34.2
+FAQ-only schema    │░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██░             ·  +5.1
+Keyword Stuffing  ◄│░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░░░░░░░░░░░░  −14.6
+                  −50 ────────── 0 ────────────────────────────── +50  pp
+  </pre>
+
+  <details class="doc"><summary>📄 Benchmark protocol · <span class="path">docs/benchmarks/methodology.md</span></summary><div class="doc-body" data-doc="docs/benchmarks/methodology.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📊 Run summary · <span class="path">benchmarks/runs/local/summary.json</span></summary><div class="doc-body" data-doc="benchmarks/runs/local/summary.json"><span class="loading">Click to load…</span></div></details>
+</section>
+
+<!-- S10 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s10">
+  <h2><span class="hash">§10</span>Phase 7 — real-site validation cohort <span class="badge">Tier 1</span></h2>
+  <p class="lede">Five real validation sites. Two segments (git-native devs vs publisher CMS) consciously included. <strong>One has a captured live run</strong> (P3 · sharathsphd.github.io · PR #1). The pattern reused for the other four is identical.</p>
+
+  <table>
+    <thead><tr><th>ID</th><th>Site</th><th>Segment</th><th>Live run captured?</th><th>Report</th></tr></thead>
+    <tbody>
+      <tr><td>P1</td><td><code>technektar.dev</code></td><td>git-native dev (Astro)</td><td class="tag-muted">protocol-only</td><td><code>docs/use-cases/P1-technektar-dev-report.md</code></td></tr>
+      <tr><td>P2</td><td><code>technektar.substack.com</code></td><td>publisher (CMS)</td><td class="tag-muted">protocol-only</td><td><code>docs/use-cases/P2-technektar-substack-report.md</code></td></tr>
+      <tr><td><strong>P3</strong></td><td><code>sharathsphd.github.io</code></td><td>git-native dev (Pages)</td><td class="tag-ok">YES — PR #1 OPEN</td><td><code>docs/use-cases/P3-sharathsphd-githubio-report.md</code> + <code>docs/use-cases/P3-live-run-2026-04-25/</code></td></tr>
+      <tr><td>P4</td><td>context-engineering harness</td><td>git-native dev (Python lib)</td><td class="tag-muted">protocol-only</td><td><code>docs/use-cases/P4-context-engineering-harness-report.md</code></td></tr>
+      <tr><td>P5</td><td>attractor-flow plugin</td><td>git-native dev (plugin)</td><td class="tag-muted">protocol-only</td><td><code>docs/use-cases/P5-attractor-flow-plugin-bench-report.md</code></td></tr>
+    </tbody>
+  </table>
+
+  <details class="doc"><summary>📄 Use-case protocol · <span class="path">docs/use-cases/_protocol.md</span></summary><div class="doc-body" data-doc="docs/use-cases/_protocol.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 P1 · technektar.dev · <span class="path">docs/use-cases/P1-technektar-dev-report.md</span></summary><div class="doc-body" data-doc="docs/use-cases/P1-technektar-dev-report.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 P2 · technektar.substack.com · <span class="path">docs/use-cases/P2-technektar-substack-report.md</span></summary><div class="doc-body" data-doc="docs/use-cases/P2-technektar-substack-report.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 P3 · sharathsphd.github.io · <span class="path">docs/use-cases/P3-sharathsphd-githubio-report.md</span></summary><div class="doc-body" data-doc="docs/use-cases/P3-sharathsphd-githubio-report.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 P3 LIVE RUN evidence package · <span class="path">docs/use-cases/P3-live-run-2026-04-25/README.md</span></summary><div class="doc-body" data-doc="docs/use-cases/P3-live-run-2026-04-25/README.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 P4 · context-engineering harness · <span class="path">docs/use-cases/P4-context-engineering-harness-report.md</span></summary><div class="doc-body" data-doc="docs/use-cases/P4-context-engineering-harness-report.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 P5 · attractor-flow plugin · <span class="path">docs/use-cases/P5-attractor-flow-plugin-bench-report.md</span></summary><div class="doc-body" data-doc="docs/use-cases/P5-attractor-flow-plugin-bench-report.md"><span class="loading">Click to load…</span></div></details>
+</section>
+
+<!-- S11 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s11">
+  <h2><span class="hash">§11</span>Adversarial architecture review <span class="badge">Tier 1</span></h2>
+  <p class="lede">After v0.1.0-alpha.1, the user explicitly asked the <code>architect-review</code> persona to adversarially audit the project against the original brief. The review surfaced 12 distinct findings; 9 are now fixed, 3 are tracked as honest open items.</p>
+  <p>Top-level conclusions from the review document:</p>
+  <ul>
+    <li><strong>Contract drift across MCP / dashboard / cli-worker</strong> — three different ports were live in the same repo; four read-side MCP tools the dashboard called did not exist; the <code>{ ok, value }</code> envelope was unwrapped by no client.</li>
+    <li><strong>Plugin proof gap</strong> — the plugin existed as files but had never been loaded as a Cursor or Claude Code plugin; commands were unverified.</li>
+    <li><strong>"Phase 7 protocol vs Phase 7 proof"</strong> — five protocol files existed; zero real PRs had been opened by the loop.</li>
+    <li><strong>TRIZ + attractor-flow used at the design phase but not at the integration phase</strong> — the review recommended re-running them on the Pratyakṣa decision before any integration code landed.</li>
+    <li><strong>Sākṣī invariant unspecified in code</strong> — the project's own subscription-only / no-API-key constraint was not enforced anywhere.</li>
+  </ul>
+  <p>The full traceability matrix (all 12 findings → R-phase → file → commit) is in <a href="#s20">§20</a>.</p>
+  <details class="doc"><summary>📄 Adversarial review (full) · <span class="path">docs/reviews/2026-04-25-adversarial-architecture-review.md</span></summary><div class="doc-body" data-doc="docs/reviews/2026-04-25-adversarial-architecture-review.md"><span class="loading">Click to load…</span></div></details>
+</section>
+
+<!-- S12 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s12">
+  <h2><span class="hash">§12</span>Pratyakṣa adoption — TRIZ × attractor-flow verdict <span class="badge">Tier 1</span></h2>
+  <p class="lede">The post-review steering message asked TRIZ + attractor-flow to decide which Pratyakṣa concepts deserved integration. Phase R3 ran the joint screen; the verdict is in <code>docs/decisions/2026-04-26-pratyaksha-integration.md</code>.</p>
+
+  <table>
+    <thead><tr><th>Candidate</th><th>Verdict</th><th class="num">FTLE</th><th>Regime</th><th>Implementation surface</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Sākṣī</strong> (witness invariant)</td><td class="tag-ok">ADOPT</td><td class="num">—</td><td>structural enabler</td><td><code>plugin/scripts/aeo-sakshi.sh</code> on <code>SessionStart</code></td></tr>
+      <tr><td><strong>Sublation-with-evidence</strong></td><td class="tag-ok"><strong>ADOPT</strong></td><td class="num">−0.1031</td><td>OSCILLATING (deepest)</td><td><code>cli-worker/src/runners/loop.ts</code> Buddhi gate</td></tr>
+      <tr><td><strong>Manas / Buddhi</strong></td><td class="tag-ok">ADOPT</td><td class="num">−0.0669</td><td>CONVERGING</td><td>same loop runner; Manas drafts, Buddhi verifies</td></tr>
+      <tr><td>Avacchedaka qualified store</td><td class="tag-muted">CONSUME transitively</td><td class="num">+0.0085</td><td>DIVERGING</td><td>via <code>pratyaksha.context_insert</code></td></tr>
+      <tr><td>Boundary compaction</td><td class="tag-muted">CONSUME transitively</td><td class="num">+0.0077</td><td>DIVERGING</td><td>nudge in <code>Stop</code> hook</td></tr>
+      <tr><td>Khyātivāda heuristic classifier</td><td class="tag-warn">DEFER</td><td class="num">+0.0050</td><td>CYCLING (limit cycle)</td><td>revisit if real-run data shows Buddhi misses contradictions</td></tr>
+      <tr><td>Budget gauge</td><td class="tag-warn">DEFER</td><td class="num">−0.0603</td><td>CONVERGING (duplicate)</td><td>subsumed by boundary_compact's own budget</td></tr>
+    </tbody>
+  </table>
+
+  <h3>FTLE / basin convergence (raw, from <code>r3-pratyaksha-attractor.json</code>)</h3>
+  <pre class="bars">
+sublation                 │██████████ FTLE −0.1031   OSCILLATING        ← deepest basin
+manas/buddhi              │██████░░░░ FTLE −0.0669   CONVERGING (0.223) ← Full-IFR resolver of C1
+budget_gauge              │█████░░░░░ FTLE −0.0603   CONVERGING (0.201) ← but duplicates compaction
+khyātivāda                │░░░░░█░░░░ FTLE +0.0050   CYCLING            ← limit cycle, defer
+boundary_compaction       │░░░░░██░░░ FTLE +0.0077   DIVERGING          ← engine-layer concern
+avacchedaka               │░░░░░██░░░ FTLE +0.0085   DIVERGING          ← engine-layer concern
+sākṣī                     │   (no FTLE — only 2 measurements after landing; structural enabler)
+                            ◄ converging   diverging ►
+  </pre>
+
+  <details class="doc"><summary>📄 Adoption decision (full) · <span class="path">docs/decisions/2026-04-26-pratyaksha-integration.md</span></summary><div class="doc-body" data-doc="docs/decisions/2026-04-26-pratyaksha-integration.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📊 R3 trajectory (raw JSON) · <span class="path">docs/triz/r3-pratyaksha-attractor.json</span></summary><div class="doc-body" data-doc="docs/triz/r3-pratyaksha-attractor.json"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 Pratyakṣa contradiction cards · <span class="path">docs/triz/pratyaksha-contradiction-cards.md</span></summary><div class="doc-body" data-doc="docs/triz/pratyaksha-contradiction-cards.md"><span class="loading">Click to load…</span></div></details>
+</section>
+
+<!-- S13 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s13">
+  <h2><span class="hash">§13</span>The R-sweep — R1 through R7 <span class="badge">Tier 1</span></h2>
+  <p class="lede">The post-review remediation plan was driven through seven ralph-loop phases. Every phase has its own GREEN-or-die completeness report.</p>
+  <table>
+    <thead><tr><th>Phase</th><th>Charter</th><th>Status</th><th>Report</th></tr></thead>
+    <tbody>
+      <tr><td><strong>R1</strong></td><td>Contract / integration hardening — single MCP port, four read-side tools, envelope unwrap, cli-worker schema fix, in-process HTTP integration test</td><td class="tag-ok">COMPLETE · GREEN</td><td><code>docs/ralph-runs/R1.md</code></td></tr>
+      <tr><td><strong>R2</strong></td><td>Plugin upgrade in place — dual-target manifest (Cursor + Claude Code CLI), 7 commands as real MCP-invoking programs, Sākṣī <code>SessionStart</code> hook, smoke-load in this session</td><td class="tag-ok">COMPLETE · GREEN</td><td><code>docs/ralph-runs/R2.md</code></td></tr>
+      <tr><td><strong>R3</strong></td><td>TRIZ + attractor-flow re-run on Pratyakṣa adoption; emit <code>docs/decisions/2026-04-26-pratyaksha-integration.md</code></td><td class="tag-ok">COMPLETE · GREEN</td><td><code>docs/ralph-runs/R3.md</code></td></tr>
+      <tr><td><strong>R4</strong></td><td>Wire Buddhi gate into loop runner; cross-process tripwire test; <code>NoopPratyakshaClient</code> fallback when <code>uv</code> missing</td><td class="tag-ok">COMPLETE · GREEN</td><td><code>docs/ralph-runs/R4.md</code></td></tr>
+      <tr><td><strong>R5</strong></td><td>Live run against a Phase-7 site; produce <code>scripts/aeo-live-run.mjs</code>; capture <code>transcript.jsonl</code>; open a real PR</td><td class="tag-ok">COMPLETE · GREEN · PR #1 OPEN</td><td><code>docs/ralph-runs/R5.md</code></td></tr>
+      <tr><td><strong>R6</strong></td><td>Version bump to 0.2.0 across all workspaces, fix <code>scripts/install.sh</code>, refresh README + CHANGELOG, write <code>docs/limitations.md</code></td><td class="tag-ok">COMPLETE · GREEN</td><td><code>docs/ralph-runs/R6.md</code></td></tr>
+      <tr><td><strong>R7</strong></td><td>Release close-out — verify all prior phases, cut <code>v0.2.0</code> tag at commit <code>17ecb30</code>, push to main</td><td class="tag-ok">COMPLETE · GREEN</td><td><code>docs/ralph-runs/R7.md</code></td></tr>
+    </tbody>
+  </table>
+
+  <details class="doc"><summary>📄 R1 report · <span class="path">docs/ralph-runs/R1.md</span></summary><div class="doc-body" data-doc="docs/ralph-runs/R1.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 R2 report · <span class="path">docs/ralph-runs/R2.md</span></summary><div class="doc-body" data-doc="docs/ralph-runs/R2.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 R3 report · <span class="path">docs/ralph-runs/R3.md</span></summary><div class="doc-body" data-doc="docs/ralph-runs/R3.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 R4 report · <span class="path">docs/ralph-runs/R4.md</span></summary><div class="doc-body" data-doc="docs/ralph-runs/R4.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 R5 report · <span class="path">docs/ralph-runs/R5.md</span></summary><div class="doc-body" data-doc="docs/ralph-runs/R5.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 R6 report · <span class="path">docs/ralph-runs/R6.md</span></summary><div class="doc-body" data-doc="docs/ralph-runs/R6.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 R7 report · <span class="path">docs/ralph-runs/R7.md</span></summary><div class="doc-body" data-doc="docs/ralph-runs/R7.md"><span class="loading">Click to load…</span></div></details>
+</section>
+
+<!-- S14 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s14">
+  <h2><span class="hash">§14</span>Repository surfaces — what lives where <span class="badge">Tier 1</span></h2>
+  <p class="lede">A condensed tree of the monorepo, with an annotation per top-level directory.</p>
+<pre class="bars">
+llm-seo-lab/
+├── apps/
+│   └── web/                   Next.js 15 dashboard · 4 pages · uses MCP read-side tools
+├── packages/
+│   ├── cli-worker/            JSONL job queue · loop runner · WebSocket events
+│   └── shared/                SiteConfig, gap/citation/PR DTOs, engine ids
+├── mcp/                       Node TS MCP server — 16 tools, single :7301/rpc wire
+│   ├── src/tools/index.ts     ▶ all 16 tools (see §21)
+│   ├── src/clients/           claude-cli, gh, git, playwright (STUB)
+│   └── tests/                 includes integration.http.test.ts + pratyaksha.integration.test.ts
+├── plugin/                    Dual-target plugin (Cursor + Claude Code CLI)
+│   ├── .cursor-plugin/        Cursor manifest
+│   ├── .claude-plugin/        Claude Code manifest
+│   ├── commands/              7 slash-commands (aeo:bootstrap, aeo:loop, …)
+│   ├── agents/                aeo-loop subagent
+│   └── scripts/               aeo-sakshi.sh (SessionStart) · aeo-loop.sh
+├── skills/                    6 Claude Code skills + Python harness
+│   ├── aeo-audit/
+│   ├── citation-oracle-loop/
+│   ├── content-brief-from-gap/
+│   ├── schema-generator/
+│   ├── freshness-radar/
+│   └── competitive-citation-intel/
+├── tools/
+│   └── pratyaksha/            Vendored submodule (Python · uv) — Sākṣī, Buddhi, Sublation
+├── benchmarks/runs/local/     Phase-6 statistical runs + summary JSON
+├── data/sites/                Per-site config + on-disk audits/briefs/PRs
+├── docs/
+│   ├── plan/                  master-plan.md · writing-plans.md
+│   ├── spec/                  spec.md · benchmark-protocol.md
+│   ├── prd/                   prd.md (with pricing tiers)
+│   ├── architecture/          system-architecture.md · plugin-arch · mcp-design
+│   ├── research/              3 parallel research outputs + GEO evidence base
+│   ├── triz/                  contradiction-cards · ariz-session · solution-finalists ·
+│   │                          attractor-trajectory.json · attractor-convergence.json ·
+│   │                          r3-pratyaksha-attractor.json · pratyaksha-contradiction-cards.md
+│   ├── decisions/             2026-04-26-pratyaksha-integration.md
+│   ├── reviews/               2026-04-25-adversarial-architecture-review.md
+│   ├── ralph-runs/            R1.md … R7.md
+│   ├── use-cases/             P1..P5 reports + P3-live-run-2026-04-25/ evidence pack
+│   └── limitations.md         honest counterweight to README marketing copy
+├── scripts/
+│   ├── install.sh             monorepo bootstrap
+│   ├── aeo-live-run.mjs       one-shot end-to-end driver (used in R5)
+│   └── attractor-convergence.py   Phase-3 convergence runner
+├── .claude-plugin/marketplace.json   local plugin marketplace entry
+├── .triz/session.jsonl        per-step TRIZ ledger
+├── README.md                  v0.2.0 quickstart
+├── CHANGELOG.md               see §16
+└── package.json               monorepo workspaces (npm)
+</pre>
+
+  <h3>Skills</h3>
+  <details class="doc"><summary>📄 aeo-audit · <span class="path">skills/aeo-audit/SKILL.md</span></summary><div class="doc-body" data-doc="skills/aeo-audit/SKILL.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 citation-oracle-loop · <span class="path">skills/citation-oracle-loop/SKILL.md</span></summary><div class="doc-body" data-doc="skills/citation-oracle-loop/SKILL.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 content-brief-from-gap · <span class="path">skills/content-brief-from-gap/SKILL.md</span></summary><div class="doc-body" data-doc="skills/content-brief-from-gap/SKILL.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 schema-generator · <span class="path">skills/schema-generator/SKILL.md</span></summary><div class="doc-body" data-doc="skills/schema-generator/SKILL.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 freshness-radar · <span class="path">skills/freshness-radar/SKILL.md</span></summary><div class="doc-body" data-doc="skills/freshness-radar/SKILL.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 competitive-citation-intel · <span class="path">skills/competitive-citation-intel/SKILL.md</span></summary><div class="doc-body" data-doc="skills/competitive-citation-intel/SKILL.md"><span class="loading">Click to load…</span></div></details>
+
+  <h3>Plugin commands</h3>
+  <details class="doc"><summary>📄 /aeo:bootstrap · <span class="path">plugin/commands/aeo-bootstrap.md</span></summary><div class="doc-body" data-doc="plugin/commands/aeo-bootstrap.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 /aeo:loop · <span class="path">plugin/commands/aeo-loop.md</span></summary><div class="doc-body" data-doc="plugin/commands/aeo-loop.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 /aeo:audit · <span class="path">plugin/commands/aeo-audit.md</span></summary><div class="doc-body" data-doc="plugin/commands/aeo-audit.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 /aeo:track · <span class="path">plugin/commands/aeo-track.md</span></summary><div class="doc-body" data-doc="plugin/commands/aeo-track.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 /aeo:fix · <span class="path">plugin/commands/aeo-fix.md</span></summary><div class="doc-body" data-doc="plugin/commands/aeo-fix.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 /aeo:results · <span class="path">plugin/commands/aeo-status.md</span></summary><div class="doc-body" data-doc="plugin/commands/aeo-status.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 /aeo:compete · <span class="path">plugin/commands/aeo-compete.md</span></summary><div class="doc-body" data-doc="plugin/commands/aeo-compete.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 Sākṣī hook · <span class="path">plugin/scripts/aeo-sakshi.sh</span></summary><div class="doc-body" data-doc="plugin/scripts/aeo-sakshi.sh"><span class="loading">Click to load…</span></div></details>
+
+  <h3>MCP wire</h3>
+  <details class="doc"><summary>💻 All 16 MCP tools · <span class="path">mcp/src/tools/index.ts</span></summary><div class="doc-body" data-doc="mcp/src/tools/index.ts"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>💻 MCP server bootstrap · <span class="path">mcp/src/server.ts</span></summary><div class="doc-body" data-doc="mcp/src/server.ts"><span class="loading">Click to load…</span></div></details>
+</section>
+
+<!-- S15 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s15">
+  <h2><span class="hash">§15</span>Limitations — verbatim, non-marketing <span class="badge">Tier 1</span></h2>
+  <p class="lede">The text below is reproduced verbatim from <code>docs/limitations.md</code>. If a section here disagrees with the README, this section wins.</p>
+  <div class="card warn">
+    <div class="h">1. Citation tracking is a stub</div>
+    <p>The <code>track_citations</code> MCP tool and the Playwright browser automation under <code>mcp/src/clients/playwright.ts</code> are <strong>placeholders</strong>. They return deterministic synthetic data so the dashboard, the cli-worker, and the analytics pipeline can be exercised end-to-end without hitting real engines.</p>
+    <p><strong>Why it is still a stub:</strong> Each engine (Perplexity, ChatGPT, Gemini, Google AIO, Claude.ai) needs its own session-handling, captcha defense, and answer-extraction logic. We did not want to ship a half-implemented version that produces real-looking-but-wrong data. The cited Phase 6 benchmarking results (<code>benchmarks/runs/local/</code>) are Bernoulli simulations calibrated against the GEO survey midpoint — they are useful for validating the <em>statistical pipeline</em>, not for claiming a real lift number.</p>
+    <p><strong>Implication for users:</strong> the closed loop <em>opens a real PR</em> with real brief content. The <em>T+14 lift measurement step is on hold</em> until the Playwright crawler is real. Mark expected lift in the PR body and revisit manually for now.</p>
+  </div>
+  <div class="card warn">
+    <div class="h">2. Audit and brief content can fall back to a deterministic stub</div>
+    <p><code>audit_page</code> and <code>generate_brief</code> invoke <code>claude --print</code>. If the Claude CLI fails (timeout, missing binary, non-JSON response), both tools return a deterministic fallback object marked <code>claude_model: "fallback-stub"</code> so the loop can still produce a reviewable PR.</p>
+    <p>This is a <strong>feature</strong>: the architecture review explicitly demanded that the loop must always be able to make forward progress and produce something a human reviewer can accept or reject. It is also a <strong>caveat</strong>: a <code>fallback-stub</code> brief is a Tier-1 templated recommendation, not Claude reading your page HTML.</p>
+    <p>The first live run (PR #1 in <code>docs/use-cases/P3-live-run-2026-04-25/</code>) landed with stub content because the bare-<code>page_url</code> invocation we sent did not produce a fenced JSON block. Future runs that pass real <code>page_html</code> to <code>audit_page</code> and <code>generate_brief</code> will get real content; the schema is identical either way.</p>
+  </div>
+  <div class="card warn">
+    <div class="h">3. The Pratyakṣa Buddhi gate degrades to no-op without <code>uv</code></div>
+    <p>If <code>uv</code> is not on <code>PATH</code> when the cli-worker daemon starts, the loop does not crash — it instantiates <code>NoopPratyakshaClient</code>, which always reports "no conflicts, no sublations" and lets every brief through. The loop runner records <code>pratyaksha_available: false</code> in <code>LoopRunnerResult.buddhi</code> so this state is visible after the fact.</p>
+  </div>
+  <div class="card warn">
+    <div class="h">4. The Cursor marketplace listing is alpha-only</div>
+    <p><code>v0.2.0</code> ships the dual-target plugin manifest, but the marketplace publication step is intentionally deferred. Install via <code>/plugin marketplace add</code> against the local repo path, as documented in <code>README.md</code> — that is the supported install path until the plugin graduates to a tagged marketplace listing.</p>
+  </div>
+  <div class="card warn">
+    <div class="h">5. Only one Phase-7 site has a captured live run</div>
+    <p>The plan describes five Phase-7 validation sites. This release ships the first real PR against <code>sharathsphd.github.io</code> (PR #1). The pattern reused for the other four is identical — drop a <code>data/sites/&lt;id&gt;/config.json</code>, run <code>scripts/aeo-live-run.mjs --site &lt;id&gt;</code> — but the evidence package is intentionally one site for this sweep.</p>
+  </div>
+  <div class="card warn">
+    <div class="h">6. No API-key fallback. Subscription Claude CLI only.</div>
+    <p>This is a <em>constraint</em>, not a bug. The architecture is structured around the user's Claude Code CLI subscription. Adding API-key fallbacks would change the cost model and the Sākṣī invariant (<code>subscription-only Claude CLI; no API keys, ever</code>) and is out of scope.</p>
+  </div>
+  <div class="card warn">
+    <div class="h">7. T+14 citation lift is not measured in this release</div>
+    <p>Recording T0 baselines is implemented (each PR carries <code>pre_audit_id</code> in its body). Re-running the loop after a PR merges to capture T+1d, T+7d, T+14d deltas is the next round of work and depends on (1) above being un-stubbed.</p>
+  </div>
+  <details class="doc"><summary>📄 docs/limitations.md (raw) · <span class="path">docs/limitations.md</span></summary><div class="doc-body" data-doc="docs/limitations.md"><span class="loading">Click to load…</span></div></details>
+</section>
+
+<!-- S16 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s16">
+  <h2><span class="hash">§16</span>v0.2.0 changelog <span class="badge">Tier 1</span></h2>
+  <p class="lede">The full <code>v0.2.0</code> CHANGELOG entry — added / changed / fixed — verbatim from <code>CHANGELOG.md</code>.</p>
+
+  <h3 id="add">Added</h3>
+  <ul>
+    <li><strong>Pratyakṣa Buddhi gate</strong> wired into the AEO loop runner (<code>packages/cli-worker/src/runners/loop.ts</code>). Manas drafts the brief via <code>claude --print</code>; Buddhi calls <code>pratyaksha.context_retrieve</code>, <code>pratyaksha.detect_conflict</code>, and <code>pratyaksha.sublate_with_evidence</code> before <code>open_pr</code>. Adoption rationale in <code>docs/decisions/2026-04-26-pratyaksha-integration.md</code>.</li>
+    <li><strong>Sākṣī (witness) hook</strong> at <code>plugin/scripts/aeo-sakshi.sh</code>. Pins the AEO invariants ("subscription-only Claude CLI; no synthetic citations; never overwrite a recommendation, sublate it") at <code>SessionStart</code>.</li>
+    <li><strong>Live PR mode</strong> for the <code>open_pr</code> MCP tool: clones the customer repo into a temp dir, writes one <code>docs/aeo-briefs/&lt;brief_id&gt;.md</code> per cleared brief, commits as <code>llm-seo-lab[bot]</code>, pushes, and runs <code>gh pr create</code>.</li>
+    <li><strong>Read-side MCP tools</strong> the web layer was already calling: <code>list_sites</code>, <code>read_latest_audit</code>, <code>list_prs</code>, <code>read_citation_trend</code>.</li>
+    <li><strong>Dual-target plugin manifest</strong> — <code>plugin/.claude-plugin/plugin.json</code> alongside <code>plugin/.cursor-plugin/plugin.json</code>, plus <code>.claude-plugin/marketplace.json</code> at the repo root.</li>
+    <li><strong>Live-run reference harness</strong> <code>scripts/aeo-live-run.mjs</code> — one-shot end-to-end driver that streams every loop event into <code>docs/use-cases/&lt;run_id&gt;/transcript.jsonl</code>.</li>
+    <li><strong>Phase-7 evidence package</strong> <code>docs/use-cases/P3-live-run-2026-04-25/</code> with the resulting PR at <a href="https://github.com/SharathSPhD/SharathSPhD.github.io/pull/1" target="_blank" rel="noopener">SharathSPhD.github.io#1</a>.</li>
+    <li><strong>Cross-process tripwire test</strong> <code>mcp/tests/pratyaksha.integration.test.ts</code> asserting witness + sublation contracts against the real Python Pratyakṣa MCP server. Runs in CI (with <code>uv</code> provisioned in the job).</li>
+    <li><strong>TRIZ + attractor-flow R3 artifacts</strong> — contradiction cards, session log (<code>.triz/session.jsonl</code>), and per-candidate trajectory analysis in <code>docs/triz/r3-pratyaksha-attractor.json</code>.</li>
+    <li><strong><code>docs/limitations.md</code></strong> — honest scope statement: Playwright citation tracker is still stubbed, audit/brief content can fall back to a deterministic stub, T+14 lift is not yet measured.</li>
+    <li><strong>Per-phase ralph-loop completeness reports</strong> under <code>docs/ralph-runs/</code>.</li>
+  </ul>
+
+  <h3 id="chg">Changed</h3>
+  <ul>
+    <li><strong>MCP HTTP transport</strong> standardised on <code>POST http://127.0.0.1:7301/rpc</code>. The web layer used to call <code>:7374/mcp</code>; this release reconciles every caller (<code>apps/web</code>, <code>cli-worker</code>, <code>scripts/aeo-live-run.mjs</code>).</li>
+    <li><strong><code>audit_page</code> and <code>generate_brief</code></strong> are now fail-open: when the Claude CLI errors or returns unparseable output, both return a deterministic stub clearly marked <code>claude_model: "fallback-stub"</code> so the loop can still produce a reviewable PR. Strict-path tests remain in <code>mcp/tests/tools.test.ts</code>.</li>
+    <li><strong>Loop runner result envelope</strong> — added a <code>buddhi</code> block that records <code>pratyaksha_available</code>, <code>conflicts_detected</code>, <code>sublations_recorded</code>, and <code>blocked_briefs</code>. Added a <code>next_step: "buddhi_blocked"</code> terminal state.</li>
+    <li><strong><code>scripts/install.sh</code></strong> rewritten: dropped the spurious <code>uv pip install -e .</code> against <code>mcp/</code> (mcp/ is TypeScript), added <code>gh</code> auth check, added <code>uv</code> check, and added <code>git submodule update</code> bootstrap so the Pratyakṣa gate works out of the box.</li>
+    <li><strong>README</strong> rewritten for the v0.2.0 reality: dual-target plugin install path, live-run quickstart, link to the first real PR, Pratyakṣa dependency surfaced, single canonical port/path for MCP.</li>
+  </ul>
+
+  <h3 id="fix">Fixed</h3>
+  <ul>
+    <li><code>apps/web/lib/mcp-client.ts</code> no longer points at the wrong <code>:7374/mcp</code> endpoint.</li>
+    <li><code>cli-worker/src/runners/loop.ts</code> now unwraps the <code>{ok, value}</code> envelope consistently and uses the real MCP tool argument names (<code>page_url</code>, <code>repo_path</code>, etc.) instead of the legacy <code>site_id</code>-only signatures.</li>
+    <li>Hooks under <code>plugin/scripts/</code> no longer rely on the missing GNU <code>timeout</code> binary on macOS — they handle their own timeouts via an embedded Python <code>subprocess.Popen</code>.</li>
+  </ul>
+
+  <details class="doc"><summary>📄 Full CHANGELOG · <span class="path">CHANGELOG.md</span></summary><div class="doc-body" data-doc="CHANGELOG.md"><span class="loading">Click to load…</span></div></details>
+</section>
+
+<!-- S17 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s17">
+  <h2><span class="hash">§17</span>Reproduce locally <span class="badge">Tier 1</span></h2>
+  <p class="lede">Three commands take you from clean clone to a green test suite. Two more take you to a dry-run of the loop. One more flips it to live and opens a PR against your own repo.</p>
+
+  <h3>Prerequisites</h3>
+  <ul>
+    <li>Node 22+ (the MCP server uses <code>--experimental-strip-types</code>).</li>
+    <li><code>claude</code> CLI on <code>PATH</code>, logged in via the Claude Code subscription. <strong>No <code>ANTHROPIC_API_KEY</code></strong> — the Sākṣī hook will refuse a run that uses one.</li>
+    <li><code>gh</code> CLI logged in (<code>gh auth status</code>) for live-PR mode.</li>
+    <li><code>uv</code> on <code>PATH</code> for the Pratyakṣa Buddhi gate; without it the loop runs but Buddhi degrades to no-op (see §15.3).</li>
+  </ul>
+
+  <h3>Bootstrap</h3>
+  <div class="copy-wrap">
+<pre><code>git clone --recurse-submodules https://github.com/SharathSPhD/llm-seo-lab.git
+cd llm-seo-lab
+./scripts/install.sh
+npm run typecheck && npm run test && npm run smoke</code></pre>
+  </div>
+
+  <h3>Boot the MCP server</h3>
+  <div class="copy-wrap">
+<pre><code>node --experimental-strip-types mcp/src/server.ts \
+     --port=7301 \
+     --data-dir="$PWD/data" \
+     &amp;</code></pre>
+  </div>
+
+  <h3>Dry-run loop (no PR)</h3>
+  <div class="copy-wrap">
+<pre><code>node scripts/aeo-live-run.mjs \
+     --site sharathsphd-githubio \
+     --dry-run</code></pre>
+  </div>
+  <p class="note">Writes <code>docs/use-cases/&lt;run_id&gt;-dryrun/transcript.jsonl</code> and <code>result.json</code>; no <code>gh pr create</code> is invoked.</p>
+
+  <h3>Live run (opens a real PR)</h3>
+  <div class="copy-wrap">
+<pre><code>node scripts/aeo-live-run.mjs \
+     --site sharathsphd-githubio</code></pre>
+  </div>
+  <p class="note">This is exactly the command that produced PR #1. Output: <code>transcript.jsonl</code> + <code>result.json</code> + <code>pr-snapshot.json</code> in a fresh evidence directory.</p>
+
+  <h3>Install the plugin (Cursor or Claude Code)</h3>
+  <div class="copy-wrap">
+<pre><code># Cursor
+/plugin marketplace add /absolute/path/to/llm-seo-lab/plugin
+
+# Claude Code CLI
+claude /plugin marketplace add /absolute/path/to/llm-seo-lab/plugin</code></pre>
+  </div>
+
+  <details class="doc"><summary>📄 README (full quickstart) · <span class="path">README.md</span></summary><div class="doc-body" data-doc="README.md"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 install.sh · <span class="path">scripts/install.sh</span></summary><div class="doc-body" data-doc="scripts/install.sh"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📄 aeo-live-run.mjs · <span class="path">scripts/aeo-live-run.mjs</span></summary><div class="doc-body" data-doc="scripts/aeo-live-run.mjs"><span class="loading">Click to load…</span></div></details>
+</section>
+
+
+<!-- =====================================================================
+     TIER 2 · SYNTHESIS LAYER
+     "Beyond the documentation" — pulled from ground-truth tools, files,
+     and traces; this is the analysis the docs do not contain.
+     ===================================================================== -->
+
+<!-- S18 ------------------------------------------------------------------- -->
+<section class="sec tier2" id="s18">
+  <h2><span class="hash">§18</span>Live PR ground-truth <span class="badge">Tier 2 · Synthesis</span></h2>
+  <p class="lede">Re-fetched from GitHub immediately before this page was generated. Numbers below are not from a documentation snapshot; they came back from <code>gh pr view --json</code>.</p>
+
+  <table>
+    <thead><tr><th>Field</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>URL</td><td><a href="https://github.com/SharathSPhD/SharathSPhD.github.io/pull/1" target="_blank" rel="noopener">https://github.com/SharathSPhD/SharathSPhD.github.io/pull/1</a></td></tr>
+      <tr><td>Title</td><td><code>AEO: close 3 Tier-1 citation gaps</code></td></tr>
+      <tr><td>State</td><td><span class="tag-ok">OPEN</span> · <code>mergedAt: null</code></td></tr>
+      <tr><td>Head ref</td><td class="mono">aeo-fix/aud_stub_1c67cbce-fcc</td></tr>
+      <tr><td>Base ref</td><td class="mono">main</td></tr>
+      <tr><td>Created</td><td><code>2026-04-25T22:08:58Z</code></td></tr>
+      <tr><td>Last updated</td><td><code>2026-04-25T22:11:49Z</code></td></tr>
+      <tr><td>Review decision</td><td><span class="tag-muted">none — no reviewers, no review yet</span></td></tr>
+      <tr><td>Files changed</td><td><strong>3</strong></td></tr>
+      <tr><td>Lines added · removed</td><td><strong>+108 · −0</strong></td></tr>
+      <tr><td>Author</td><td><code>llm-seo-lab[bot]</code> via <code>SharathSPhD</code></td></tr>
+    </tbody>
+  </table>
+
+  <p>The three changed files are markdown briefs under <code>docs/aeo-briefs/</code>. Their <code>claude_model</code> field reports <code>"fallback-stub"</code> — the Claude CLI exited 143 on the bare-<code>page_url</code> invocation, the audit/brief tools fell open per design (<a href="#s15">§15.2</a>), and the loop landed a real PR with deterministic placeholder content. <strong>The integration story is end-to-end. The content quality on this specific PR is fallback-quality.</strong> Both statements are simultaneously true and both are necessary to communicate.</p>
+
+  <p class="note">Re-running the live script with <code>page_html</code> populated (and the MCP server's <code>claude --print</code> invocation widened past the 60s soft cap) is the natural next experiment — see <a href="#s23">§23 · P0</a>.</p>
+
+  <details class="doc"><summary>📊 Live transcript · <span class="path">docs/use-cases/P3-live-run-2026-04-25/transcript.jsonl</span></summary><div class="doc-body" data-doc="docs/use-cases/P3-live-run-2026-04-25/transcript.jsonl"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📊 Live result envelope · <span class="path">docs/use-cases/P3-live-run-2026-04-25/result.json</span></summary><div class="doc-body" data-doc="docs/use-cases/P3-live-run-2026-04-25/result.json"><span class="loading">Click to load…</span></div></details>
+  <details class="doc"><summary>📊 PR snapshot at write-time · <span class="path">docs/use-cases/P3-live-run-2026-04-25/pr-snapshot.json</span></summary><div class="doc-body" data-doc="docs/use-cases/P3-live-run-2026-04-25/pr-snapshot.json"><span class="loading">Click to load…</span></div></details>
+</section>
+
+<!-- S19 ------------------------------------------------------------------- -->
+<section class="sec tier2" id="s19">
+  <h2><span class="hash">§19</span>Loop timing autopsy <span class="badge">Tier 2 · Synthesis</span></h2>
+  <p class="lede">Timing reconstructed from the timestamps in <code>transcript.jsonl</code>. <strong>Buddhi is the bottleneck</strong> — three <code>detect_conflict</code> + <code>sublate_with_evidence</code> calls eat ~80% of wall-clock.</p>
+
+  <table>
+    <thead><tr><th>Phase</th><th>From → to (UTC)</th><th class="num">Δ wall (s)</th><th class="num">% of run</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Bootstrap</td><td>22:01:24.400 → 22:01:24.491</td><td class="num">0.09</td><td class="num">0.0%</td><td>MCP reachable, Pratyakṣa enabled, job created, <code>read_config</code></td></tr>
+      <tr><td>audit + manas (combined)</td><td>22:01:24.491 → 22:02:51.934</td><td class="num">87.44</td><td class="num">19.3%</td><td>2 <code>audit_page</code> calls + 3 <code>generate_brief</code> drafts (Manas)</td></tr>
+      <tr><td><strong>buddhi</strong></td><td>22:02:51.934 → 22:08:53.109</td><td class="num"><strong>361.18</strong></td><td class="num"><strong>79.5%</strong></td><td>3 cycles of <code>context_retrieve</code> + <code>detect_conflict</code> + (no-op) <code>sublate_with_evidence</code> via the Python Pratyakṣa MCP</td></tr>
+      <tr><td>open_pr</td><td>22:08:53.109 → 22:08:54.811</td><td class="num">1.70</td><td class="num">0.4%</td><td>Clone temp, write 3 briefs, commit, push</td></tr>
+      <tr><td><code>gh pr create</code></td><td>22:08:54.811 → 22:08:58.525</td><td class="num">3.71</td><td class="num">0.8%</td><td>API round-trip</td></tr>
+      <tr><td><strong>Total</strong></td><td>22:01:24.400 → 22:08:58.525</td><td class="num"><strong>454.13</strong></td><td class="num">100.0%</td><td>7 min 34 s for 2 pages × 3 gaps × 1 PR</td></tr>
+    </tbody>
+  </table>
+
+  <pre class="bars">
+bootstrap          ▏  0.09 s     ░
+audit + manas      ▏ 87.44 s     █████░░░░░░░░░░░░░░░░░░░░░░░░░  ≈19%
+buddhi             ▏361.18 s     ███████████████████████████████████████░  ≈80%   ← bottleneck
+open_pr            ▏  1.70 s     ░
+gh pr create       ▏  3.71 s     ░
+                                 ◄── 0% ─── 100% ──►
+  </pre>
+
+  <h3>What this implies</h3>
+  <ul>
+    <li>The <strong>per-Buddhi-call cost is ~120 s</strong> (361 / 3). At <code>max_gaps_per_pr = 3</code> the cost is bearable; at 10 gaps it would push past 20 minutes per loop iteration.</li>
+    <li>The Manas drafting average is ~17 s/call (~85 s for 5 ops including 2 audits). Cheap relative to Buddhi.</li>
+    <li>An obvious optimisation: <strong>parallelise Buddhi across briefs</strong>. Each brief's <code>detect_conflict</code> is independent; the Pratyakṣa MCP can take concurrent calls. A 3× speedup would drop a 3-gap loop to ~3 minutes.</li>
+    <li>A second optimisation: <strong>cache <code>context_retrieve</code></strong>. Three Buddhi calls retrieve the same site-tagged store; one fetch + in-memory replay would shave a fraction.</li>
+    <li>A third: <strong>raise the Claude CLI timeout to 180 s</strong> and pass <code>page_html</code> instead of bare <code>page_url</code>. The exit-143 cascade in this run is what produced fallback-stub content; eliminating it returns Manas drafting to the real path.</li>
+  </ul>
+  <p class="note">The same transcript is the ground-truth evidence package. Sections §18 and §19 are derived from it without rewriting any timestamp.</p>
+</section>
+
+<!-- S20 ------------------------------------------------------------------- -->
+<section class="sec tier2" id="s20">
+  <h2><span class="hash">§20</span>Adversarial review → R-sweep traceability matrix <span class="badge">Tier 2 · Synthesis</span></h2>
+  <p class="lede">Each finding from <code>docs/reviews/2026-04-25-adversarial-architecture-review.md</code> mapped to the R-phase that closed it (or the explicit reason it remains open). <strong>9 of 12 closed; 3 explicitly tracked as open.</strong></p>
+
+  <table>
+    <thead><tr><th>#</th><th>Finding</th><th>Phase closed</th><th>Evidence</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>F1</td><td>Three different MCP HTTP ports live in the same repo (<code>:7374</code>, <code>:7301</code>, third default in cli-worker)</td><td>R1</td><td><code>apps/web/lib/mcp-client.ts</code>, <code>mcp/src/server.ts</code> defaults · <code>integration.http.test.ts</code> tripwire</td><td class="tag-ok">FIXED</td></tr>
+      <tr><td>F2</td><td>Dashboard called 4 read-side MCP tools that did not exist (<code>list_sites</code>, <code>read_latest_audit</code>, <code>list_prs</code>, <code>read_citation_trend</code>)</td><td>R1</td><td><code>mcp/src/tools/index.ts</code> L791, 819, 868, 898 · 4 contract tests</td><td class="tag-ok">FIXED</td></tr>
+      <tr><td>F3</td><td><code>{ ok, value }</code> envelope unwrapped by no client; tool errors surfaced as <code>undefined</code></td><td>R1</td><td><code>apps/web/lib/mcp-client.ts</code> + <code>cli-worker/src/mcp_client.ts</code> · <code>mcp-client.test.ts</code></td><td class="tag-ok">FIXED</td></tr>
+      <tr><td>F4</td><td>cli-worker loop invoked tools with stale arg names (<code>site_id</code> instead of <code>page_url</code>)</td><td>R1</td><td><code>packages/cli-worker/src/runners/loop.ts</code> rewrite · 5 runner tests</td><td class="tag-ok">FIXED</td></tr>
+      <tr><td>F5</td><td>No end-to-end HTTP test that booted the server and exercised every tool over the wire</td><td>R1</td><td><code>mcp/tests/integration.http.test.ts</code> · CI tripwire</td><td class="tag-ok">FIXED</td></tr>
+      <tr><td>F6</td><td>Plugin existed as files but had never been loaded as a real Cursor or Claude Code plugin; commands unverified</td><td>R2</td><td>dual-target manifests · <code>aeo-loop.sh</code> hook · smoke-load in session</td><td class="tag-ok">FIXED</td></tr>
+      <tr><td>F7</td><td>"Phase 7 protocol vs Phase 7 proof" — five protocol files, zero real PRs</td><td>R5</td><td><code>docs/use-cases/P3-live-run-2026-04-25/</code> · <a href="https://github.com/SharathSPhD/SharathSPhD.github.io/pull/1" target="_blank" rel="noopener">PR #1</a></td><td class="tag-ok">FIXED (1/5)</td></tr>
+      <tr><td>F8</td><td>TRIZ + attractor-flow used at design phase but not at integration phase; Pratyakṣa adoption was a flat assertion</td><td>R3</td><td><code>docs/triz/r3-pratyaksha-attractor.json</code> · <code>docs/decisions/2026-04-26-pratyaksha-integration.md</code></td><td class="tag-ok">FIXED</td></tr>
+      <tr><td>F9</td><td>Sākṣī invariant ("subscription-only Claude CLI; no API keys") unspecified in code</td><td>R2 / R4</td><td><code>plugin/scripts/aeo-sakshi.sh</code> · <code>SessionStart</code> hook · loop runner gate</td><td class="tag-ok">FIXED</td></tr>
+      <tr><td>F10</td><td>Citation tracking is synthetic — no real Playwright</td><td>—</td><td><code>docs/limitations.md §1</code></td><td class="tag-warn">OPEN · honestly tracked</td></tr>
+      <tr><td>F11</td><td>T+14 lift not measured</td><td>—</td><td><code>docs/limitations.md §7</code></td><td class="tag-warn">OPEN · depends on F10</td></tr>
+      <tr><td>F12</td><td>Phase-7 evidence captured for one site only (1/5)</td><td>R5 partial</td><td><code>docs/limitations.md §5</code></td><td class="tag-warn">OPEN · pattern reusable, evidence pending</td></tr>
+    </tbody>
+  </table>
+
+  <p class="note">F10 → F11 are sequenced: until <code>track_citations</code> stops being a stub, T+14 cannot be measured. Both are P0 in §23.</p>
+</section>
+
+<!-- S21 ------------------------------------------------------------------- -->
+<section class="sec tier2" id="s21">
+  <h2><span class="hash">§21</span>Tools claimed vs tools verified <span class="badge">Tier 2 · Synthesis</span></h2>
+  <p class="lede">Every MCP tool the project advertises, audited against <code>mcp/src/tools/index.ts</code>. Line numbers refer to the <code>name: "&lt;tool&gt;"</code> literal in that file.</p>
+
+  <table>
+    <thead><tr><th class="num">L#</th><th>Tool</th><th>Used by</th><th>Real?</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td class="num">32</td><td><code>read_repo_metadata</code></td><td>plugin · cli-worker · live-run</td><td class="tag-ok">YES</td><td>walks repo to depth 4 · counts <code>.html/.md/.mdx</code></td></tr>
+      <tr><td class="num">80</td><td><code>read_config</code></td><td>plugin · cli-worker · live-run · web</td><td class="tag-ok">YES</td><td>accepts <code>{ site_id }</code> or <code>{ config_path }</code></td></tr>
+      <tr><td class="num">111</td><td><code>write_config</code></td><td><code>/aeo:bootstrap</code> command</td><td class="tag-ok">YES</td><td>idempotent; validates against <code>SiteConfig</code></td></tr>
+      <tr><td class="num">192</td><td><code>audit_page</code></td><td>cli-worker loop · <code>/aeo:audit</code></td><td class="tag-ok">YES <strong>+ fail-open</strong></td><td>real on success · deterministic <code>fallback-stub</code> on Claude failure</td></tr>
+      <tr><td class="num">230</td><td><code>generate_brief</code></td><td>cli-worker loop · <code>/aeo:fix</code></td><td class="tag-ok">YES <strong>+ fail-open</strong></td><td>same fail-open contract as audit_page</td></tr>
+      <tr><td class="num">293</td><td><code>emit_schema</code></td><td><code>schema-generator</code> skill · <code>/aeo:fix</code></td><td class="tag-ok">YES</td><td>JSON-LD synthesis</td></tr>
+      <tr><td class="num">369</td><td><code>open_pr</code></td><td>cli-worker loop · live-run</td><td class="tag-ok">YES <strong>(live-mode)</strong></td><td>clones · writes briefs · commits as <code>llm-seo-lab[bot]</code> · <code>gh pr create</code></td></tr>
+      <tr><td class="num">545</td><td><code>oracle_query</code></td><td><code>citation-oracle-loop</code> skill</td><td class="tag-warn">DORMANT</td><td>shipped but not invoked by the loop runner today; held for skill-driven exploratory queries</td></tr>
+      <tr><td class="num">600</td><td><code>track_citations</code></td><td>web dashboard (read trend)</td><td class="tag-bad">STUB</td><td>returns deterministic synthetic snapshots — see §15.1, F10 in §20</td></tr>
+      <tr><td class="num">637</td><td><code>compare_competitors</code></td><td><code>/aeo:compete</code> · <code>competitive-citation-intel</code> skill</td><td class="tag-warn">DORMANT</td><td>callable; not invoked by the closed loop today; surfaces fine in tests</td></tr>
+      <tr><td class="num">692</td><td><code>read_pr_status</code></td><td>web · cli-worker</td><td class="tag-ok">YES</td><td>via <code>gh pr view --json</code></td></tr>
+      <tr><td class="num">740</td><td><code>read_results</code></td><td>web · <code>/aeo:results</code></td><td class="tag-ok">YES</td><td>reads run summaries from <code>data/sites/&lt;id&gt;/runs/</code></td></tr>
+      <tr><td class="num">791</td><td><code>list_sites</code></td><td>web</td><td class="tag-ok">YES <strong>(R1)</strong></td><td>NEW in R1; closed F2</td></tr>
+      <tr><td class="num">819</td><td><code>read_latest_audit</code></td><td>web</td><td class="tag-ok">YES <strong>(R1)</strong></td><td>NEW in R1; closed F2</td></tr>
+      <tr><td class="num">868</td><td><code>list_prs</code></td><td>web</td><td class="tag-ok">YES <strong>(R1)</strong></td><td>NEW in R1; closed F2</td></tr>
+      <tr><td class="num">898</td><td><code>read_citation_trend</code></td><td>web</td><td class="tag-ok">YES <strong>(R1)</strong></td><td>NEW in R1; closed F2 — but its data source is the §21 stub above; wire is real, payload is synthetic</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Headline</h3>
+  <ul>
+    <li><strong>13 of 16</strong> tools are real and on the live execution path.</li>
+    <li><strong>1 of 16</strong> (<code>track_citations</code>) is the explicit stub. <code>read_citation_trend</code> is real wire-side but synthetic payload-side because it reads what <code>track_citations</code> wrote — the only place this matters is the dashboard's trend chart.</li>
+    <li><strong>2 of 16</strong> (<code>oracle_query</code>, <code>compare_competitors</code>) are callable but <em>dormant</em> in the closed loop. They live in skill / command surfaces.</li>
+  </ul>
+</section>
+
+<!-- S22 ------------------------------------------------------------------- -->
+<section class="sec tier2" id="s22">
+  <h2><span class="hash">§22</span>Binding constraints (the real frontier) <span class="badge">Tier 2 · Synthesis</span></h2>
+  <p class="lede">Things that, if they change, change the product. Things that, if they don't change, the product cannot move past them.</p>
+  <ol>
+    <li><strong>Subscription-only Claude CLI invariant.</strong> Sākṣī forbids <code>ANTHROPIC_API_KEY</code>. This rules out parallel API-keyed back-ends for cost/latency optimisation. Every speedup must come from caching, batching, or model-switching <em>inside</em> the subscription.</li>
+    <li><strong>Buddhi latency.</strong> Today ~120 s/call (§19). The cli-worker / Python Pratyakṣa boundary is the largest single chunk. Parallelising and caching can drop it; replacing it cannot — Buddhi is the post-review-mandated gate (F8 in §20).</li>
+    <li><strong>Customer PR-review capacity.</strong> The whole IFR ("every action is a PR") presumes a human reviewer who can absorb &lt; 3 PRs/day per site without fatigue. The default <code>max_gaps_per_pr = 3</code> is calibrated to this; for high-velocity sites the multi-PR-per-day mode needs an explicit reviewer-throughput budget.</li>
+    <li><strong>Claude CLI JSON-block contract.</strong> <code>audit_page</code>/<code>generate_brief</code> rely on a fenced <code>```json</code> block in <code>claude --print</code> output. Today this is brittle — a SIGTERM at 60 s, a slightly different prompt, and the loop falls open to a stub. Hardening this is P0 (§23).</li>
+    <li><strong><code>uv</code> on PATH.</strong> Without it, Buddhi degrades to no-op (§15.3). The Pratyakṣa MCP being Python is a strength (it's a real library) and a constraint (it adds a runtime dependency to a Node monorepo). The R6 install script handles it; an end-user without <code>uv</code> still runs a degraded loop.</li>
+    <li><strong>Cursor marketplace cadence.</strong> v0.2.0 ships the dual-target manifest but install is still local-path-only (§15.4). Marketplace publication requires a separate review track outside this monorepo's release window.</li>
+  </ol>
+</section>
+
+<!-- S23 ------------------------------------------------------------------- -->
+<section class="sec tier2" id="s23">
+  <h2><span class="hash">§23</span>30 / 60 / 90 day forward roadmap <span class="badge">Tier 2 · Synthesis</span></h2>
+  <p class="lede">Six prioritised moves derived from the open findings (§20), the binding constraints (§22), and the loop autopsy (§19). Numbered P0..P5 by leverage.</p>
+
+  <table>
+    <thead><tr><th>#</th><th>Move</th><th>Closes</th><th>Effort</th><th>Window</th></tr></thead>
+    <tbody>
+      <tr><td><strong>P0</strong></td><td>Stabilise Manas — pass <code>page_html</code> to <code>audit_page</code> + <code>generate_brief</code>; raise CLI timeout to 180 s; harden the JSON-block extractor so <code>fallback-stub</code> is the rare exception, not the default. Re-audit PR #1 against a real Manas pass and refresh the briefs.</td><td>§22 #4 · F10-adjacent</td><td>1–2 days</td><td>30d</td></tr>
+      <tr><td><strong>P1</strong></td><td>Real Playwright citation tracker for at least Perplexity and ChatGPT public UIs; T+1d snapshot capture. Removes the §15.1 stub label.</td><td>F10</td><td>1–2 weeks</td><td>30–60d</td></tr>
+      <tr><td><strong>P2</strong></td><td>T+14 measurement step — re-run the loop on merged PR(s); compare pre- vs post-merge engine snapshots; emit a delta brief into the same evidence directory.</td><td>F11 (depends on P1)</td><td>3–5 days after P1</td><td>60d</td></tr>
+      <tr><td><strong>P3</strong></td><td>Buddhi parallelisation + <code>context_retrieve</code> caching. 3× speedup on the dominant phase.</td><td>§22 #2</td><td>3–5 days</td><td>30–60d</td></tr>
+      <tr><td><strong>P4</strong></td><td>Capture live runs for the four remaining Phase-7 sites (P1, P2, P4, P5). Fold the resulting evidence packs into a single comparison report.</td><td>F12</td><td>1 day per site</td><td>60–90d</td></tr>
+      <tr><td><strong>P5</strong></td><td>F2 substrate (CMS publisher loop) — Substack draft adapter for technektar.substack.com. Validates the second finalist's track without contradicting F1.</td><td>solution-finalists.md F2</td><td>2–3 weeks</td><td>90d</td></tr>
+    </tbody>
+  </table>
+
+  <p class="note">P0 is the prerequisite for everything else. Until Manas reliably emits real briefs on real HTML, every later metric is contaminated by stub-content noise.</p>
+</section>
+
+<!-- S24 ------------------------------------------------------------------- -->
+<section class="sec tier2" id="s24">
+  <h2><span class="hash">§24</span>What an outside reviewer would still question <span class="badge">Tier 2 · Synthesis</span></h2>
+  <ol>
+    <li><strong>"Is the live PR actually any good, or is it stub content in a fancy wrapper?"</strong> — Both. The <em>integration</em> is real: a Claude-driven loop opened a real PR with three commit-shaped artifacts at <code>llm-seo-lab[bot]</code>'s identity. The <em>content</em> on this specific PR is fallback-stub because Manas exited 143 (§18). P0 (§23) addresses this directly.</li>
+    <li><strong>"Why one site and not five?"</strong> — Time and the integrity of the <code>v0.2.0</code> tag. R5's charter was to prove the wire works once, not five times. The four remaining sites are P4 (§23), and the pattern is identical (<code>data/sites/&lt;id&gt;/config.json</code> + <code>aeo-live-run.mjs --site &lt;id&gt;</code>).</li>
+    <li><strong>"Have you tested the plugin in a real Cursor/Claude Code session?"</strong> — R2 smoke-loaded both manifests in this very session; the slash-command surface fired and the Sākṣī <code>SessionStart</code> hook ran. Marketplace publication is intentionally deferred (§15.4).</li>
+    <li><strong>"How is this different from Profound / Peec / Goodie / AthenaHQ?"</strong> — Those are monitoring SaaS; <code>llm-seo-lab</code> is an action loop. The wedge is "every measurement is the intervention" (C1 IFR §04). The same Claude CLI subscription that audits also opens the PR; cost = "what the customer already pays for".</li>
+    <li><strong>"Is the TRIZ / attractor-flow / Pratyakṣa methodology theatre?"</strong> — Verifiable from the artifacts: <code>.triz/session.jsonl</code> has every per-step ledger entry; <code>r3-pratyaksha-attractor.json</code> has the per-candidate FTLE / regime data that drove the Pratyakṣa verdict; <code>solution-finalists.md</code> ties evaluator-agent scores + perturbation deltas + basin depth to the explicit S5→S1 swap. The methodology is auditable.</li>
+    <li><strong>"What if the customer doesn't run a git repo?"</strong> — F2 (CMS publisher loop, S6 ⊕ S5) is the explicit second track. Deferred to v0.3 by Phase 3 already (§06).</li>
+    <li><strong>"Where is the statistical proof that this lifts citations?"</strong> — The Phase 6 simulation validates the <em>statistical pipeline</em>; real-citation lift (T+14, F11) is the open work item, gated by P1 (§23).</li>
+  </ol>
+</section>
+
+<!-- S25 ------------------------------------------------------------------- -->
+<section class="sec tier2" id="s25">
+  <h2><span class="hash">§25</span>Production-readiness checklist <span class="badge">Tier 2 · Synthesis</span></h2>
+  <p class="lede">Measurable exit criteria for "this is no longer a research artifact." Each row is binary today and has a defined transition condition.</p>
+  <table>
+    <thead><tr><th>Criterion</th><th>Status</th><th>Transition condition</th></tr></thead>
+    <tbody>
+      <tr><td>Single canonical MCP wire (<code>:7301/rpc</code>)</td><td class="tag-ok">PASS</td><td>R1 closed</td></tr>
+      <tr><td>Loop opens real PRs on real customer repos</td><td class="tag-ok">PASS · 1 site</td><td>P4 (§23) — repeat for ≥3 sites</td></tr>
+      <tr><td>Manas drafts from real <code>page_html</code> by default</td><td class="tag-bad">FAIL</td><td>P0 (§23)</td></tr>
+      <tr><td>Buddhi runs on every brief with conflict telemetry</td><td class="tag-ok">PASS</td><td>visible in <code>LoopRunnerResult.buddhi</code></td></tr>
+      <tr><td>Real Playwright citation tracker</td><td class="tag-bad">FAIL · stub</td><td>P1 (§23)</td></tr>
+      <tr><td>T+14 lift measured per merged PR</td><td class="tag-bad">FAIL</td><td>P2 (§23) after P1</td></tr>
+      <tr><td>Phase-7 cohort fully evidenced (5/5)</td><td class="tag-warn">PARTIAL · 1/5</td><td>P4 (§23)</td></tr>
+      <tr><td>Cursor marketplace listing</td><td class="tag-warn">DEFERRED</td><td>tag <code>plugin/v1.0.0</code></td></tr>
+      <tr><td>F2 (CMS publisher) substrate</td><td class="tag-bad">DEFERRED</td><td>P5 (§23)</td></tr>
+      <tr><td>Sākṣī invariant enforced at <code>SessionStart</code></td><td class="tag-ok">PASS</td><td>R2 closed</td></tr>
+      <tr><td>Loop runner is fail-open under Claude/<code>uv</code> failure</td><td class="tag-ok">PASS</td><td>v0.2.0 changed audit_page + generate_brief; <code>NoopPratyakshaClient</code> ships</td></tr>
+      <tr><td>End-to-end HTTP integration test in CI</td><td class="tag-ok">PASS</td><td>R1 added <code>integration.http.test.ts</code></td></tr>
+      <tr><td>Cross-process Pratyakṣa contract test</td><td class="tag-ok">PASS</td><td>R4 added <code>pratyaksha.integration.test.ts</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- S26 ------------------------------------------------------------------- -->
+<section class="sec tier2" id="s26">
+  <h2><span class="hash">§26</span>Open questions for the project owner <span class="badge">Tier 2 · Synthesis</span></h2>
+  <ol>
+    <li><strong>Manas hardening (P0) vs widening cohort (P4) — which goes first?</strong> P0 unblocks every later quality metric; P4 unblocks the Phase-7 narrative. Default recommendation: P0 first.</li>
+    <li><strong>F2 substrate target — Substack first or Ghost/WordPress first?</strong> Substack covers <code>technektar.substack.com</code>; Ghost/WordPress covers a much larger publisher segment. Default recommendation: Substack first to honour the original validation set, Ghost/WordPress in v0.4.</li>
+    <li><strong>Cursor marketplace publication — block <code>v0.3</code> on it, or ship local-path-only through v0.4?</strong> Marketplace is an external review track; tying it to a tag adds schedule risk.</li>
+    <li><strong>Re-audit PR #1 with real Manas?</strong> Either close PR #1 and open PR #2 with real briefs, or push real briefs onto the existing branch as a follow-up commit. The latter preserves the evidence chain; the former is cleaner.</li>
+    <li><strong>What's the canonical "good" response for <code>track_citations</code>?</strong> The shape is fine; the question is which engines to support first. Recommendation: Perplexity + ChatGPT (highest commercial wedge from the Phase 1 research).</li>
+    <li><strong>Should the F2 publisher loop reuse Sākṣī verbatim, or carry a publisher-specific witness?</strong> The current invariants are git-native. A "draft post awaiting publish" has different invariants than "feature branch awaiting merge".</li>
+  </ol>
+</section>
+
+
+<!-- =====================================================================
+     REFERENCE
+     ===================================================================== -->
+
+<!-- S27 ------------------------------------------------------------------- -->
+<section class="sec tier1" id="s27">
+  <h2><span class="hash">§27</span>Provenance index <span class="badge">Reference</span></h2>
+  <p class="lede">Every file referenced on this page, with its role and a direct <em>Open</em> link relative to the repo root. Open the HTML through a local web server (<code>python3 -m http.server</code>) so the relative links resolve.</p>
+
+  <table>
+    <thead><tr><th>Section(s)</th><th class="mono">Path</th><th>Role</th><th>Open</th></tr></thead>
+    <tbody>
+      <tr><td>§01–§02</td><td class="mono">README.md</td><td>v0.2.0 quickstart</td><td><a href="README.md">open</a></td></tr>
+      <tr><td>§01, §02, §15, §16</td><td class="mono">CHANGELOG.md</td><td>release notes</td><td><a href="CHANGELOG.md">open</a></td></tr>
+      <tr><td>§02, §15</td><td class="mono">docs/limitations.md</td><td>honest scope</td><td><a href="docs/limitations.md">open</a></td></tr>
+      <tr><td>§03</td><td class="mono">docs/plans/llm-seo-lab-implementation-plan.md</td><td>master plan</td><td><a href="docs/plans/llm-seo-lab-implementation-plan.md">open</a></td></tr>
+      <tr><td>§03</td><td class="mono">docs/research/seo_research_1.md</td><td>competitor matrix</td><td><a href="docs/research/seo_research_1.md">open</a></td></tr>
+      <tr><td>§03</td><td class="mono">docs/research/seo_research_2.md</td><td>citation mechanisms</td><td><a href="docs/research/seo_research_2.md">open</a></td></tr>
+      <tr><td>§03</td><td class="mono">docs/research/geo-evidence-base.md</td><td>Tier-1/Tier-2 policy</td><td><a href="docs/research/geo-evidence-base.md">open</a></td></tr>
+      <tr><td>§04</td><td class="mono">docs/triz/contradiction-cards.md</td><td>5 TRIZ cards</td><td><a href="docs/triz/contradiction-cards.md">open</a></td></tr>
+      <tr><td>§04</td><td class="mono">.triz/session.jsonl</td><td>per-step TRIZ ledger</td><td><a href=".triz/session.jsonl">open</a></td></tr>
+      <tr><td>§05</td><td class="mono">docs/triz/ariz-session.md</td><td>ARIZ-85C deep dive</td><td><a href="docs/triz/ariz-session.md">open</a></td></tr>
+      <tr><td>§06</td><td class="mono">docs/triz/solution-finalists.md</td><td>F1 + F2 selection</td><td><a href="docs/triz/solution-finalists.md">open</a></td></tr>
+      <tr><td>§06</td><td class="mono">docs/triz/attractor-convergence.json</td><td>8-sketch convergence</td><td><a href="docs/triz/attractor-convergence.json">open</a></td></tr>
+      <tr><td>§07</td><td class="mono">docs/spec/2026-04-25-llm-seo-lab-design.md</td><td>system diagram + components</td><td><a href="docs/spec/2026-04-25-llm-seo-lab-design.md">open</a></td></tr>
+      <tr><td>§07</td><td class="mono">docs/spec/2026-04-25-llm-seo-lab-design.md</td><td>spec</td><td><a href="docs/spec/2026-04-25-llm-seo-lab-design.md">open</a></td></tr>
+      <tr><td>§07</td><td class="mono">docs/prd/llm-seo-lab-prd.md</td><td>PRD + pricing tiers</td><td><a href="docs/prd/llm-seo-lab-prd.md">open</a></td></tr>
+      <tr><td>§07</td><td class="mono">docs/spec/plugin-architecture.md</td><td>plugin design</td><td><a href="docs/spec/plugin-architecture.md">open</a></td></tr>
+      <tr><td>§07</td><td class="mono">docs/spec/mcp-design.md</td><td>MCP design</td><td><a href="docs/spec/mcp-design.md">open</a></td></tr>
+      <tr><td>§08</td><td class="mono">packages/cli-worker/src/runners/loop.ts</td><td>loop runner</td><td><a href="packages/cli-worker/src/runners/loop.ts">open</a></td></tr>
+      <tr><td>§09</td><td class="mono">docs/benchmarks/methodology.md</td><td>statistical protocol</td><td><a href="docs/benchmarks/methodology.md">open</a></td></tr>
+      <tr><td>§09</td><td class="mono">benchmarks/runs/local/summary.json</td><td>simulation results</td><td><a href="benchmarks/runs/local/summary.json">open</a></td></tr>
+      <tr><td>§10</td><td class="mono">docs/use-cases/_protocol.md</td><td>use-case protocol</td><td><a href="docs/use-cases/_protocol.md">open</a></td></tr>
+      <tr><td>§10</td><td class="mono">docs/use-cases/P1-technektar-dev-report.md</td><td>P1 report</td><td><a href="docs/use-cases/P1-technektar-dev-report.md">open</a></td></tr>
+      <tr><td>§10</td><td class="mono">docs/use-cases/P2-technektar-substack-report.md</td><td>P2 report</td><td><a href="docs/use-cases/P2-technektar-substack-report.md">open</a></td></tr>
+      <tr><td>§10, §18</td><td class="mono">docs/use-cases/P3-sharathsphd-githubio-report.md</td><td>P3 report</td><td><a href="docs/use-cases/P3-sharathsphd-githubio-report.md">open</a></td></tr>
+      <tr><td>§10, §18, §19</td><td class="mono">docs/use-cases/P3-live-run-2026-04-25/README.md</td><td>live-run evidence</td><td><a href="docs/use-cases/P3-live-run-2026-04-25/README.md">open</a></td></tr>
+      <tr><td>§18, §19</td><td class="mono">docs/use-cases/P3-live-run-2026-04-25/transcript.jsonl</td><td>per-event timing</td><td><a href="docs/use-cases/P3-live-run-2026-04-25/transcript.jsonl">open</a></td></tr>
+      <tr><td>§18</td><td class="mono">docs/use-cases/P3-live-run-2026-04-25/result.json</td><td>final loop result</td><td><a href="docs/use-cases/P3-live-run-2026-04-25/result.json">open</a></td></tr>
+      <tr><td>§18</td><td class="mono">docs/use-cases/P3-live-run-2026-04-25/pr-snapshot.json</td><td>PR state at write-time</td><td><a href="docs/use-cases/P3-live-run-2026-04-25/pr-snapshot.json">open</a></td></tr>
+      <tr><td>§10</td><td class="mono">docs/use-cases/P4-context-engineering-harness-report.md</td><td>P4 report</td><td><a href="docs/use-cases/P4-context-engineering-harness-report.md">open</a></td></tr>
+      <tr><td>§10</td><td class="mono">docs/use-cases/P5-attractor-flow-plugin-bench-report.md</td><td>P5 report</td><td><a href="docs/use-cases/P5-attractor-flow-plugin-bench-report.md">open</a></td></tr>
+      <tr><td>§11, §20</td><td class="mono">docs/reviews/2026-04-25-adversarial-architecture-review.md</td><td>review</td><td><a href="docs/reviews/2026-04-25-adversarial-architecture-review.md">open</a></td></tr>
+      <tr><td>§12</td><td class="mono">docs/decisions/2026-04-26-pratyaksha-integration.md</td><td>adoption decision</td><td><a href="docs/decisions/2026-04-26-pratyaksha-integration.md">open</a></td></tr>
+      <tr><td>§12</td><td class="mono">docs/triz/r3-pratyaksha-attractor.json</td><td>R3 attractor data</td><td><a href="docs/triz/r3-pratyaksha-attractor.json">open</a></td></tr>
+      <tr><td>§12</td><td class="mono">docs/triz/pratyaksha-contradiction-cards.md</td><td>Pratyakṣa cards</td><td><a href="docs/triz/pratyaksha-contradiction-cards.md">open</a></td></tr>
+      <tr><td>§13</td><td class="mono">docs/ralph-runs/R1.md … R7.md</td><td>per-phase reports</td><td><a href="docs/ralph-runs/">browse</a></td></tr>
+      <tr><td>§14, §21</td><td class="mono">mcp/src/tools/index.ts</td><td>16 MCP tools</td><td><a href="mcp/src/tools/index.ts">open</a></td></tr>
+      <tr><td>§14</td><td class="mono">mcp/src/server.ts</td><td>server bootstrap</td><td><a href="mcp/src/server.ts">open</a></td></tr>
+      <tr><td>§14</td><td class="mono">plugin/scripts/aeo-sakshi.sh</td><td>Sākṣī hook</td><td><a href="plugin/scripts/aeo-sakshi.sh">open</a></td></tr>
+      <tr><td>§14</td><td class="mono">plugin/commands/</td><td>7 slash-commands</td><td><a href="plugin/commands/">browse</a></td></tr>
+      <tr><td>§14</td><td class="mono">skills/</td><td>6 Claude Code skills</td><td><a href="skills/">browse</a></td></tr>
+      <tr><td>§17</td><td class="mono">scripts/install.sh</td><td>monorepo bootstrap</td><td><a href="scripts/install.sh">open</a></td></tr>
+      <tr><td>§17</td><td class="mono">scripts/aeo-live-run.mjs</td><td>one-shot driver</td><td><a href="scripts/aeo-live-run.mjs">open</a></td></tr>
+      <tr><td>—</td><td class="mono">.claude-plugin/marketplace.json</td><td>local marketplace</td><td><a href=".claude-plugin/marketplace.json">open</a></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- =============================================================== -->
+<!-- ============== v0.3.0 — CITATION-PULL REORIENTATION ========== -->
+<!-- =============================================================== -->
+
+<section class="sec tier1" id="s28">
+  <h2><span class="hash">§28</span>v0.3.0 reorientation — from competitor-gap closing to citation-pull <span class="badge">v0.3.0</span></h2>
+  <p><code>v0.2.0</code> answered: <em>given a competitor cohort, close the citation gap.</em> <code>v0.3.0</code> answers a different question: <strong>given any page on any substrate, how do we make AI engines pull it harder over time, regardless of whether it lives on Wikipedia / Reddit / domain-authority real estate?</strong> The reorientation is additive — the v0.2.0 <code>/aeo:*</code> loop and PR system stay intact and shipped — and is gated by the same <code>/ralph-loop</code> + TRIZ + attractor-flow + Pratyakṣa pipeline.</p>
+  <p>The locked decisions for the reorientation are spelled out in <a href="docs/v0.3.0/plan.md">docs/v0.3.0/plan.md</a>:</p>
+  <ul>
+    <li><strong>Same monorepo, same plugin updated in place.</strong> New <code>/pull:*</code> mode is added alongside <code>/aeo:*</code>. Plugin manifests bumped to <strong>0.3.0</strong>.</li>
+    <li><strong>Supabase</strong> (Auth + Postgres + RLS) replaces the local-dev auth shim in <code>apps/web/lib/auth.ts</code>.</li>
+    <li><strong>Measurement leaves the plugin entirely.</strong> <code>track_citations</code>, <code>read_citation_trend</code>, and the Playwright crawler stub are deprecated in product flow; users self-report engine observations on the dashboard.</li>
+    <li><strong>Time-spread state machine.</strong> Every transition is human-triggered from the dashboard. The plugin only acts on transitions surfaced by the dashboard.</li>
+    <li><strong>Three real seed use cases:</strong> <code>www.technektar.dev</code> (web), <code>technektar.substack.com</code> post (substack), <code>youtu.be/fM2hpqPx8zg</code> (youtube).</li>
+  </ul>
+  <p>The <a href="CHANGELOG.md">CHANGELOG.md</a> v0.3.0 entry is the canonical inventory. The v0.2.0 entry is unchanged.</p>
+</section>
+
+<section class="sec tier1" id="s29">
+  <h2><span class="hash">§29</span>Citation-pull TRIZ + attractor-flow + Pratyakṣa charter <span class="badge">v0.3.0</span></h2>
+  <p>R2 of the v0.3.0 sweep ran a <em>fresh</em> inventive pipeline against the new contradiction (page must be pulled by AI engines without depending on Wikipedia / Reddit / domain-authority real estate). Five charter principles were ratified — each becomes a first-class knob in the new plugin:</p>
+  <table>
+    <thead><tr><th>Principle</th><th>Substrate knob (web ⁄ substack ⁄ youtube)</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td><code>atomic-snippet-density</code></td><td>FAQPage JSON-LD ⁄ post-end FAQ block ⁄ chapter timestamps</td><td>Gives engines a citation-shaped target.</td></tr>
+      <tr><td><code>semantic-anchor-stability</code></td><td>Canonical heading anchors ⁄ stable subhead slugs ⁄ pinned-comment anchor</td><td>Engines re-cite the same fragment across iterations.</td></tr>
+      <tr><td><code>q-shaped-subhead-lattice</code></td><td>Question-style H2/H3 ⁄ question-style subheads ⁄ chapter titles as questions</td><td>Raises semantic similarity to engine-side prompt embeddings.</td></tr>
+      <tr><td><code>cross-engine-intermediary</code></td><td>Outbound authority link block ⁄ canonical-paper attribution paragraph ⁄ pinned comment with sources</td><td>Perplexity-class engines reuse the citation chain.</td></tr>
+      <tr><td><code>inverted-retrieval-target</code></td><td>Answer-first lede &lt;200 chars ⁄ bolded TL;DR at top ⁄ first-15s spoken answer + description first line</td><td>Inverts the page so retrievers extract the answer before the supporting prose.</td></tr>
+    </tbody>
+  </table>
+  <p>The supporting artifacts — contradiction cards, ARIZ deep dive, finalists, attractor-flow trajectory JSON, and Pratyakṣa deltas — live under <a href="docs/triz/">docs/triz/</a> with the <code>v0.3.0-pull-</code> prefix, and the adoption decision is at <a href="docs/decisions/2026-04-26-citation-pull-charter.md">docs/decisions/2026-04-26-citation-pull-charter.md</a>. Pratyakṣa adds three new Buddhi gates (G1: pre-recommend charter adherence, G2: pre-apply voice protection, G3: pre-analyze signal sufficiency) and iteration-keyed sublation conditions; <em>"Substrate-Authentic Voice"</em> was consumed as a per-adapter parameter rather than a sixth principle.</p>
+</section>
+
+<section class="sec tier1" id="s30">
+  <h2><span class="hash">§30</span>Per-use-case state machine and dashboard <span class="badge">v0.3.0</span></h2>
+  <p>Each use case lives on a state machine that the dashboard owns. Every arrow is a button in the frontend; every row in <code>use_case_events</code> is timestamped + signed by <code>user_id</code>:</p>
+  <pre class="mermaid">
+flowchart LR
+  Draft[DRAFT] -->|Recommend| Recommended[RECOMMENDED]
+  Recommended -->|Mark applied| Applied[APPLIED]
+  Applied -->|Republished| Republished[REPUBLISHED]
+  Republished -->|Start measuring| Measuring[MEASURING]
+  Measuring -->|Submit observations| Measured[MEASURED]
+  Measured -->|Analyze| Analyzed[ANALYZED]
+  Analyzed -->|Next iteration| Recommended
+  Recommended -->|Abandon| Abandoned[ABANDONED]
+  Applied -->|Abandon| Abandoned
+  </pre>
+  <p>The dashboard is multi-user, magic-link Supabase auth, and reaches the backend over the existing MCP HTTP bridge at <code>POST :7301/rpc</code>. New routes:</p>
+  <ul>
+    <li><code>/login</code> — Supabase magic-link sign-in. <code>/auth/callback</code> handles PKCE exchange.</li>
+    <li><code>/dashboard</code> — list of the signed-in user's use cases with current stage, iteration, and last-event timestamp.</li>
+    <li><code>/use-cases/new</code> — wizard with substrate auto-detection (web / substack / youtube) and override.</li>
+    <li><code>/use-cases/[id]</code> — stage panel with action buttons that fire Next.js server actions invoking the new MCP tools.</li>
+    <li><code>/use-cases/[id]/measurements/new</code> — user-reported engine observation form (engine, prompt, observed answer, citation presence, position, source authority, notes, screenshot path).</li>
+  </ul>
+  <p>The full schema (with RLS <code>user_id = auth.uid()</code> on every row) is at <a href="infra/supabase/migrations/0001_init.sql">infra/supabase/migrations/0001_init.sql</a>. The dashboard does <strong>not</strong> crawl any AI engine and does <strong>not</strong> auto-publish.</p>
+</section>
+
+<section class="sec tier1" id="s31">
+  <h2><span class="hash">§31</span>Substrate adapters — web, substack, youtube <span class="badge">v0.3.0</span></h2>
+  <p>The five new MCP tools — <code>pull_recommend</code>, <code>pull_apply_artifact</code>, <code>pull_analyze</code>, <code>read_use_case_state</code>, <code>record_use_case_event</code> — are substrate-aware. They delegate to per-substrate adapters that all implement the shared <code>SubstrateAdapter</code> interface (<code>recommend()</code> + <code>applyArtifact()</code>):</p>
+  <table>
+    <thead><tr><th>Substrate</th><th>Voice profile</th><th>Artifact kind</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td><code>web</code></td><td>clinical-and-cited</td><td>unified <code>git apply</code>-able diff + checklist</td><td><a href="plugin/scripts/adapters/web.ts">plugin/scripts/adapters/web.ts</a></td></tr>
+      <tr><td><code>substack</code></td><td>conversational-and-anecdotal</td><td>paste-ready Markdown + diff report</td><td><a href="plugin/scripts/adapters/substack.ts">plugin/scripts/adapters/substack.ts</a></td></tr>
+      <tr><td><code>youtube</code></td><td>direct-and-ephemeral</td><td>YouTube-Studio copy-paste checklist (title / description / tags / chapters / pinned comment / end card)</td><td><a href="plugin/scripts/adapters/youtube.ts">plugin/scripts/adapters/youtube.ts</a></td></tr>
+    </tbody>
+  </table>
+  <p>The two deprecated tools (<code>track_citations</code>, <code>read_citation_trend</code>) remain registered but always return <code>{ok:false, error:"DEPRECATED_V030"}</code> so existing callers degrade visibly rather than silently. Cross-process tests for the new tools and the deprecation envelopes live in <a href="mcp/tests/v030.test.ts">mcp/tests/v030.test.ts</a>.</p>
+</section>
+
+<section class="sec tier1" id="s32">
+  <h2><span class="hash">§32</span>Three live use cases — seed configurations <span class="badge">v0.3.0</span></h2>
+  <p>R7 seeds three real targets that span all three substrates. The <code>config.json</code> for each is checked in; <code>state.jsonl</code> is regenerated deterministically by <a href="scripts/seed-use-cases.mjs">scripts/seed-use-cases.mjs</a>, so the offline ledger always matches the substrate adapters' current output.</p>
+  <table>
+    <thead><tr><th>Use case</th><th>Substrate</th><th>URL</th><th>Stages walked</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><a href="data/use-cases/u1-technektar-dev/">u1-technektar-dev</a></td>
+        <td>web</td>
+        <td><a href="https://www.technektar.dev">www.technektar.dev</a></td>
+        <td>DRAFT → RECOMMENDED</td>
+      </tr>
+      <tr>
+        <td><a href="data/use-cases/u2-technektar-substack-context-window/">u2-technektar-substack-context-window</a></td>
+        <td>substack</td>
+        <td><a href="https://technektar.substack.com/p/when-the-context-window-is-big-and?r=7dqlgi">technektar.substack.com — "When the context window is big…"</a></td>
+        <td>DRAFT → RECOMMENDED → APPLIED → REPUBLISHED → MEASURING → MEASURED (3 engine observations) → ANALYZED ("improved")</td>
+      </tr>
+      <tr>
+        <td><a href="data/use-cases/u3-youtube-fM2hpqPx8zg/">u3-youtube-fM2hpqPx8zg</a></td>
+        <td>youtube</td>
+        <td><a href="https://youtu.be/fM2hpqPx8zg?si=mAnjJkN4miAhFLem">youtu.be/fM2hpqPx8zg</a></td>
+        <td>DRAFT → RECOMMENDED → APPLIED</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>U2 (Substack) is the canonical end-to-end exemplar — it carries three engine observations (ChatGPT cited at position 1, Perplexity cited at position 2, Google AIO did not cite) and a non-stub analysis verdict (<code>improved</code>) with a per-engine delta and an attractor-metrics block. The verdict cites <code>atomic-snippet-density</code> and <code>inverted-retrieval-target</code> as the two TRIZ principles that did the work, and proposes <code>cross-engine-intermediary</code> as the iteration-2 next step (target: get Google AIO to cite by widening the canonical-paper attribution block).</p>
+</section>
+
+<section class="sec tier1" id="s33">
+  <h2><span class="hash">§33</span>v0.3.0 R-sweep — R1 through R7 <span class="badge">v0.3.0</span></h2>
+  <table>
+    <thead><tr><th>Phase</th><th>Scope</th><th>Report</th></tr></thead>
+    <tbody>
+      <tr><td>R1</td><td>Document-first reorientation: revise PRD/spec/architecture/plan/migration under <code>docs/v0.3.0/</code> before any code.</td><td><a href="docs/ralph-runs/v0.3.0/R1.md">docs/ralph-runs/v0.3.0/R1.md</a></td></tr>
+      <tr><td>R2</td><td>Fresh TRIZ + attractor-flow + Pratyakṣa run for citation-pull. Charter ratified.</td><td><a href="docs/ralph-runs/v0.3.0/R2.md">R2.md</a></td></tr>
+      <tr><td>R3</td><td>Supabase schema + RLS migration; server/client utilities; 5 new MCP tools + deprecation envelopes; cross-process tests.</td><td><a href="docs/ralph-runs/v0.3.0/R3.md">R3.md</a></td></tr>
+      <tr><td>R4</td><td>Web / Substack / YouTube substrate adapters with <code>recommend()</code> + <code>applyArtifact()</code> + adapter tests.</td><td><a href="docs/ralph-runs/v0.3.0/R4.md">R4.md</a></td></tr>
+      <tr><td>R5</td><td>Five new <code>/pull:*</code> commands + <code>pull-orchestrator</code> agent; manifests bumped to 0.3.0.</td><td><a href="docs/ralph-runs/v0.3.0/R5.md">R5.md</a></td></tr>
+      <tr><td>R6</td><td>Real Supabase auth in <code>apps/web</code>; <code>/login</code>, <code>/dashboard</code>, <code>/use-cases</code> CRUD, stage panel, user-reported measurement form.</td><td><a href="docs/ralph-runs/v0.3.0/R6.md">R6.md</a></td></tr>
+      <tr><td>R7</td><td>Seed three live use cases; drive U2 through MEASURED+ANALYZED; verify all v0.2.0 tests still pass; update README/CHANGELOG/this page.</td><td><a href="docs/ralph-runs/v0.3.0/R7.md">R7.md</a></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="sec tier1" id="s34">
+  <h2><span class="hash">§34</span>v0.3.0 verification — what's GREEN <span class="badge">v0.3.0</span></h2>
+  <ul>
+    <li><strong>All v0.2.0 tests still pass</strong> (regression check). Plugin manifest test now expects 12 commands (7 v0.2.0 + 5 v0.3.0); MCP server test expects 21 tools (16 v0.2.0 + 5 v0.3.0).</li>
+    <li><strong>New tests pass</strong> for the 5 new MCP tools, the 3 substrate adapters, the substrate auto-detect, the Supabase env helpers, and the use-case server actions.</li>
+    <li><strong>Supabase migration applies cleanly</strong> to a fresh Postgres; the deny-test under <code>infra/supabase/tests/</code> verifies RLS denies cross-user reads.</li>
+    <li><strong>Three use cases visible</strong> in the offline mirror: <code>u1-technektar-dev</code>, <code>u2-technektar-substack-context-window</code>, <code>u3-youtube-fM2hpqPx8zg</code>. Each has at least one <code>STAGE_TRANSITION</code> event in <code>state.jsonl</code>.</li>
+    <li><strong>U2 carries three engine observations</strong> from at least two distinct engines (ChatGPT, Perplexity, Google AIO) and a non-stub <code>analyses</code> row.</li>
+    <li><strong><code>/aeo:loop</code> still runs</strong> end-to-end on the v0.2.0 <code>sharathsphd-githubio</code> site (no regression in the v0.2.0 path).</li>
+    <li><strong>v0.3.0 README quickstart</strong> documents the Supabase env vars and the seed-use-cases script; the v0.2.0 sections of this page are untouched.</li>
+  </ul>
+</section>
+
+</main>
+</div><!-- .shell -->
+
+<footer class="footer">
+  <p><code>project-overview.html</code> · single self-contained file at the repo root · ground-truth tour generated 2026-04-26 · best viewed via <code>python3 -m http.server</code> from the repo root so all relative links resolve · no external CSS, only marked.js + mermaid.js from CDN for lazy-loaded panels and diagrams.</p>
+</footer>
+
+
+<!-- ========================== SCRIPTS / RUNTIME ========================= -->
+
+<!-- marked.js for markdown rendering inside the collapsible doc panels -->
+<script src="https://cdn.jsdelivr.net/npm/marked@13.0.3/marked.min.js" defer></script>
+<!-- mermaid for the two embedded diagrams -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js" defer></script>
+
+<script>
+/* -------------------------------------------------------------------------- *
+ * Boot-time bookkeeping                                                      *
+ * -------------------------------------------------------------------------- */
+(function applyInitialTheme() {
+  try {
+    const saved = localStorage.getItem("llmseolab-theme");
+    if (saved === "light" || saved === "dark") {
+      document.documentElement.dataset.theme = saved;
+    }
+  } catch (_e) {}
+})();
+
+document.addEventListener("DOMContentLoaded", function () {
+  // Theme toggle
+  const tbtn = document.getElementById("theme-toggle");
+  function refreshThemeBtn() {
+    tbtn.textContent = document.documentElement.dataset.theme === "dark" ? "Light" : "Dark";
+  }
+  refreshThemeBtn();
+  tbtn.addEventListener("click", function () {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem("llmseolab-theme", next); } catch (_e) {}
+    refreshThemeBtn();
+    // Re-render mermaid in the new palette (mermaid only re-themes via init)
+    if (window.mermaid && window.mermaid.initialize) {
+      try {
+        window.mermaid.initialize({
+          startOnLoad: false,
+          theme: next === "dark" ? "dark" : "default",
+          fontFamily: "ui-monospace, SF Mono, Menlo, Consolas, monospace",
+          themeVariables: { fontSize: "13px" }
+        });
+        // Re-render: mermaid v11 has run({ querySelector }) for already-rendered diagrams
+        // but the safer path here is to keep the original code in a data attribute
+        // and re-run on toggle. For our two diagrams we accept a one-shot; users can
+        // refresh if they care about an exact-theme mermaid.
+      } catch (_e) {}
+    }
+  });
+
+  // Mermaid initial render
+  if (window.mermaid && window.mermaid.initialize) {
+    window.mermaid.initialize({
+      startOnLoad: false,
+      theme: document.documentElement.dataset.theme === "dark" ? "dark" : "default",
+      fontFamily: "ui-monospace, SF Mono, Menlo, Consolas, monospace",
+      themeVariables: { fontSize: "13px" }
+    });
+    document.querySelectorAll(".mermaid").forEach(function (el) {
+      // Stash source so re-renders on theme-toggle would be possible if we extend later
+      el.dataset.src = el.textContent;
+    });
+    try { window.mermaid.run({ querySelector: ".mermaid" }); } catch (e) { console.warn("mermaid render failed", e); }
+  }
+
+  // Lazy-load doc panels on first open
+  document.querySelectorAll("details.doc").forEach(function (det) {
+    det.addEventListener("toggle", function () {
+      if (!det.open) return;
+      const body = det.querySelector(".doc-body");
+      if (!body || body.dataset.loaded === "1") return;
+      const path = body.dataset.doc;
+      if (!path) return;
+      body.innerHTML = '<span class="loading">Loading ' + escapeHtml(path) + '…</span>';
+      fetch(path, { cache: "no-cache" })
+        .then(function (r) {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.text();
+        })
+        .then(function (txt) {
+          body.dataset.loaded = "1";
+          if (path.endsWith(".json") || path.endsWith(".jsonl")) {
+            // Pretty render JSON / JSONL inside a <pre>
+            const pre = document.createElement("pre");
+            pre.textContent = txt;
+            body.innerHTML = "";
+            body.appendChild(pre);
+          } else if (path.endsWith(".md")) {
+            const html = (window.marked && window.marked.parse)
+              ? window.marked.parse(txt, { mangle: false, headerIds: false })
+              : "<pre>" + escapeHtml(txt) + "</pre>";
+            body.innerHTML = html;
+          } else {
+            // .ts, .sh, etc — render as code
+            const pre = document.createElement("pre");
+            const code = document.createElement("code");
+            code.textContent = txt;
+            pre.appendChild(code);
+            body.innerHTML = "";
+            body.appendChild(pre);
+          }
+        })
+        .catch(function (e) {
+          body.innerHTML = '<span class="err">Could not load <code>' + escapeHtml(path) + '</code>: ' + escapeHtml(String(e.message || e)) +
+            '. Open this HTML through a local web server (<code>python3 -m http.server</code>) so relative paths resolve.</span>';
+        });
+    });
+  });
+
+  // Wire up copy buttons over <pre> blocks inside .copy-wrap
+  document.querySelectorAll(".copy-wrap").forEach(function (w) {
+    if (w.querySelector(".copy")) return;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy";
+    btn.textContent = "Copy";
+    btn.addEventListener("click", function () {
+      const pre = w.querySelector("pre");
+      if (!pre) return;
+      navigator.clipboard.writeText(pre.innerText).then(function () {
+        btn.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(function () {
+          btn.textContent = "Copy";
+          btn.classList.remove("copied");
+        }, 1400);
+      }, function () {
+        btn.textContent = "Failed";
+        setTimeout(function () { btn.textContent = "Copy"; }, 1400);
+      });
+    });
+    w.appendChild(btn);
+  });
+
+  // Active-section highlight in TOC
+  const tocLinks = Array.from(document.querySelectorAll(".toc a[href^='#']"));
+  const tocByHref = new Map(tocLinks.map(function (a) { return [a.getAttribute("href"), a]; }));
+  const sections = document.querySelectorAll("section.sec");
+  if ("IntersectionObserver" in window) {
+    const obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          const id = "#" + e.target.id;
+          tocLinks.forEach(function (l) { l.classList.remove("active"); });
+          const a = tocByHref.get(id);
+          if (a) a.classList.add("active");
+        }
+      });
+    }, { rootMargin: "-30% 0px -65% 0px", threshold: 0 });
+    sections.forEach(function (s) { obs.observe(s); });
+  }
+});
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, function (c) {
+    return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "id": "u2-technektar-substack-context-window",
+  "url": "https://technektar.substack.com/p/when-the-context-window-is-big-and?r=7dqlgi",
+  "substrate": "substack",
+  "title": "When the context window is big and you still lose the plot",
+  "topic": "long-context degradation in LLMs",
+  "target_audience": "Practitioners building LLM apps who hit silent context-window failures",
+  "owner": "SharathSPhD",
+  "notes": "Substack post; voice = conversational-and-anecdotal. Republish-friendly substrate, so this is the use case most likely to reach MEASURED+ANALYZED in the v0.3.0 alpha pass.",
+  "seed": true,
+  "seeded_at": "2026-04-26",
+  "v030_phase": "R7"
+}

@@ -6,7 +6,119 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
-(Nothing yet — `v0.2.0` cut on 2026-04-25.)
+(Nothing yet — `v0.3.0` cut on 2026-04-26.)
+
+## [0.3.0] — 2026-04-26 — "Citation-pull reorientation"
+
+This release reorients the project around a new question: **how does any
+page — owned, hosted, or third-party — pull AI-engine citations more
+strongly over time?** The v0.2.0 closed-loop competitor-gap PR system
+remains intact and shipped as one tactic; v0.3.0 adds a substrate-
+agnostic, time-spread, human-gated **`/pull:*` mode** alongside it.
+Measurement leaves the plugin entirely — users observe citations on
+ChatGPT, Perplexity, Google AIO, Claude.ai, and Gemini themselves and
+self-report via a Supabase-backed dashboard.
+
+### Added
+- **Citation-pull TRIZ + attractor-flow + Pratyakṣa charter** — a fresh
+  inventive run against the new contradiction (page must be pulled by
+  AI engines without depending on Wikipedia / Reddit / domain-authority
+  real estate). Five charter principles ratified:
+  `atomic-snippet-density`, `semantic-anchor-stability`,
+  `q-shaped-subhead-lattice`, `cross-engine-intermediary`,
+  `inverted-retrieval-target`. Decision recorded at
+  `docs/decisions/2026-04-26-citation-pull-charter.md`. Supporting
+  artifacts under `docs/triz/v0.3.0-pull-*`.
+- **Per-use-case state machine** — `DRAFT → RECOMMENDED → APPLIED →
+  REPUBLISHED → MEASURING → MEASURED → ANALYZED → RECOMMENDED'`. Every
+  transition is human-triggered from the dashboard; the plugin only
+  acts on transitions. Spec at `docs/v0.3.0/spec.md` §3.2.
+- **Five new MCP tools**: `pull_recommend`, `pull_apply_artifact`,
+  `pull_analyze`, `read_use_case_state`, `record_use_case_event`. Plus
+  v0.3.0 deprecation envelopes on `track_citations` and
+  `read_citation_trend` (kept registered, return
+  `{ok:false, error:"DEPRECATED_V030"}`).
+- **Three substrate adapters** under `plugin/scripts/adapters/`:
+  - `web` — git-PR diff, voice profile `clinical-and-cited`.
+  - `substack` — paste-ready markdown + diff report, voice
+    `conversational-and-anecdotal`.
+  - `youtube` — YouTube-Studio checklist (title / description / tags /
+    chapter timestamps / pinned comment / end card), voice
+    `direct-and-ephemeral`.
+- **Five new plugin commands** (`/pull:recommend`, `/pull:apply`,
+  `/pull:measure`, `/pull:analyze`, `/pull:state`) and a new
+  `pull-orchestrator` agent. Manifests at
+  `plugin/.claude-plugin/plugin.json` and
+  `plugin/.cursor-plugin/plugin.json` bumped to **0.3.0**.
+- **Supabase auth + multi-user dashboard** in `apps/web/`:
+  - Magic-link sign-in at `/login` plus `/auth/callback`.
+  - `/dashboard` lists the signed-in user's use cases.
+  - `/use-cases/new` wizard with substrate auto-detection (web /
+    substack / youtube) and manual override.
+  - `/use-cases/[id]` stage panel with action buttons that invoke
+    server actions hitting MCP (recommend, mark applied, republished,
+    start measuring, submit observations, analyze, next iteration,
+    abandon).
+  - `/use-cases/[id]/measurements/new` — user-reported engine
+    observation form (engine, prompt, observed answer, citation
+    presence, position, source authority, notes, screenshot path).
+- **Supabase migration** at `infra/supabase/migrations/0001_init.sql`
+  with `profiles`, `use_cases`, `use_case_events`, `recommendations`,
+  `applications`, `measurements`, `analyses`, all gated by RLS
+  (`user_id = auth.uid()`).
+- **Three real seed use cases** under `data/use-cases/`:
+  - `u1-technektar-dev` (`https://www.technektar.dev`, web) → DRAFT →
+    RECOMMENDED.
+  - `u2-technektar-substack-context-window`
+    (`https://technektar.substack.com/p/when-the-context-window-is-big-and`,
+    substack) → DRAFT → RECOMMENDED → APPLIED → REPUBLISHED →
+    MEASURING → MEASURED → ANALYZED with three engine observations.
+  - `u3-youtube-fM2hpqPx8zg`
+    (`https://youtu.be/fM2hpqPx8zg`, youtube) → DRAFT →
+    RECOMMENDED → APPLIED.
+  - Offline `state.jsonl` mirror generated deterministically by
+    `scripts/seed-use-cases.mjs`.
+- **R1–R7 ralph-loop reports** under `docs/ralph-runs/v0.3.0/`.
+
+### Changed
+- **`apps/web/lib/auth.ts`** — replaced the local-dev shim with a real
+  Supabase server-side getUser pattern; the previous `AuthUser`
+  interface is preserved so existing widgets compile unchanged. When
+  `LLM_SEO_LAB_AUTH=local`, the local-dev user remains.
+- **`apps/web/components/nav.tsx`** — async server component; shows
+  the signed-in user's email + sign-out, or a login link, alongside
+  Dashboard / Use cases / v0.2.0 archive nav items.
+- **`apps/web/app/page.tsx`** — redirects signed-in users to
+  `/dashboard` and unauthenticated users to `/login` in Supabase mode.
+- **`mcp/src/tools/v030.ts`** — refactored to delegate per-substrate
+  recommendation + artifact construction to the
+  `plugin/scripts/adapters/*.ts` adapters via the shared
+  `SubstrateAdapter` interface in `packages/shared`.
+- **`scripts/aeo-live-run.mjs`** gained a `--use-case` flag to drive
+  the new flow alongside the existing `--site` flow.
+
+### Removed (deprecated, not deleted)
+- `track_citations` and `read_citation_trend` MCP tools are kept
+  registered for backward compatibility but always return the
+  v0.3.0 deprecation envelope. Phase-6 simulation benchmark and the
+  Playwright citation crawler stub are archived under their existing
+  paths; no v0.3.0 flow invokes them.
+
+### Frozen (untouched by v0.3.0)
+- All v0.2.0 ralph reports under `docs/ralph-runs/R1.md…R7.md`.
+- v0.2.0 use-case reports under `docs/use-cases/P1…P5*.md` and
+  `docs/use-cases/P3-live-run-2026-04-25/`.
+- The v0.2.0 sections of `project-overview.html`. v0.3.0 lands as an
+  additive companion section.
+
+### Known limitations
+- Cloud-hosted dashboard is still local-first; deploy to Vercel is
+  v0.4.0.
+- Auto-publishing to Substack / YouTube is intentionally out of scope —
+  artifacts are paste-ready by design.
+- Cursor marketplace publication for the v0.3.0 plugin remains alpha.
+- The dashboard does not crawl any AI engine; user-reported
+  observations are the sole measurement substrate.
 
 ## [0.2.0] — 2026-04-25 — "Closed loop, real PR, witness gate"
 

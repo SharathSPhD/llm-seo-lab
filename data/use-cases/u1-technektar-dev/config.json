@@ -1,0 +1,13 @@
+{
+  "id": "u1-technektar-dev",
+  "url": "https://www.technektar.dev",
+  "substrate": "web",
+  "title": "technektar.dev — landing page",
+  "topic": "AI engineer portfolio: context engineering",
+  "target_audience": "Hiring managers and senior AI engineers evaluating Sharath's context-engineering work",
+  "owner": "SharathSPhD",
+  "notes": "Hosted custom domain (not a github.io page). 'web' substrate covers either git-backed PRs or paste-ready HTML/Markdown depending on whether we have repo access on first inspection. Iteration cadence: ~weekly.",
+  "seed": true,
+  "seeded_at": "2026-04-26",
+  "v030_phase": "R7"
+}
